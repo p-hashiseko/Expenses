@@ -13,6 +13,9 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
+# node_modules ディレクトリ
+node_modules/
+
 # 環境変数ファイルのバリエーション（念のため）
 .env
 .env.development.local
