@@ -16,27 +16,19 @@ import React from 'react';
 
 import { APP_COLORS } from '../../color.config';
 import type { Category } from '../../domain/models/Category';
-import type { ExpensesObjectiveConfig } from '../../domain/models/ExpensesObjectiveConfig';
+import type { FixedCostsConfigFront } from '../../domain/models/FixedCostsConfig';
+import { formatCurrency, sanitizeNumericInput } from '../../uitls/formatters';
+// 修正
 import { SecondaryAddButton } from './SecondaryAddButton';
 
-// 数値をカンマ区切り文字列に変換するヘルパー
-const formatNumber = (val: number | null) => {
-  if (val === null) return '';
-  return val.toLocaleString();
-};
-
-// カンマを除去して数値に戻すヘルパー
-const parseNumber = (val: string) => {
-  const num = parseInt(val.replace(/,/g, ''), 10);
-  return isNaN(num) ? 0 : num;
-};
+// 共通関数をインポート
 
 // --- 1. 個別の行コンポーネント ---
 export type RecurringItemRowProps = {
-  item: ExpensesObjectiveConfig;
+  item: FixedCostsConfigFront; // 修正
   index: number;
   categories: Category[];
-  onUpdate: (index: number, key: keyof ExpensesObjectiveConfig, value: any) => void;
+  onUpdate: (index: number, key: keyof FixedCostsConfigFront, value: any) => void; // 修正
   onRemove: (index: number) => void;
   amountDisabled?: boolean;
 };
@@ -62,13 +54,15 @@ export const RecurringItemRow: React.FC<RecurringItemRowProps> = ({
       <Stack direction="row" spacing={2} alignItems="center">
         <TextField
           label="毎月の日付"
-          type="number"
           size="small"
-          value={item.day}
-          onChange={(e) => onUpdate(index, 'day', Number(e.target.value))}
+          value={item.paymentDate} // day -> paymentDate
+          // 数字以外の入力を防ぐため sanitizeNumericInput を適用しつつ数値化
+          onChange={(e) =>
+            onUpdate(index, 'paymentDate', Number(sanitizeNumericInput(e.target.value)))
+          }
           sx={{ width: 140 }}
           InputProps={{
-            inputProps: { min: 1, max: 31 },
+            inputProps: { inputMode: 'numeric', min: 1, max: 31 },
             endAdornment: <Typography variant="caption">日</Typography>,
           }}
         />
@@ -122,10 +116,14 @@ export const RecurringItemRow: React.FC<RecurringItemRowProps> = ({
           <TextField
             label="金額"
             size="small"
-            value={formatNumber(item.amount)}
-            onChange={(e) => onUpdate(index, 'amount', parseNumber(e.target.value))}
+            value={formatCurrency(item.amount ?? 0)} // formatNumber -> formatCurrency
+            // 全角・カンマ・マイナスを除去して数値に戻す
+            onChange={(e) =>
+              onUpdate(index, 'amount', Number(sanitizeNumericInput(e.target.value)))
+            }
             sx={{ flex: 1.5, '& .MuiInputBase-input': { textAlign: 'right' } }}
             InputProps={{
+              inputMode: 'numeric',
               endAdornment: (
                 <Typography variant="body2" sx={{ ml: 0.5, color: APP_COLORS.textPrimary }}>
                   円
@@ -135,7 +133,6 @@ export const RecurringItemRow: React.FC<RecurringItemRowProps> = ({
           />
         )}
 
-        {/* ここで渡される index が全体の正しいインデックスになります */}
         <IconButton onClick={() => onRemove(index)} sx={{ color: APP_COLORS.error }}>
           <Delete />
         </IconButton>
@@ -149,9 +146,9 @@ type RecurringSectionProps = {
   title: string;
   isFixed: boolean;
   icon: React.ReactNode;
-  items: ExpensesObjectiveConfig[]; // これは「全アイテム」である必要があります
+  items: FixedCostsConfigFront[]; // 修正
   categories: Category[];
-  onUpdate: (index: number, key: keyof ExpensesObjectiveConfig, value: any) => void;
+  onUpdate: (index: number, key: keyof FixedCostsConfigFront, value: any) => void; // 修正
   onRemove: (index: number) => void;
   onAdd: (isFixed: boolean) => void;
   saving?: boolean;
@@ -168,7 +165,7 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({
   onAdd,
   saving = false,
 }) => {
-  // 表示対象だけをフィルタリング
+  // 表示対象だけをフィルタリング（固定費なら amount が null 以外）
   const displayItems = items.filter((item) =>
     isFixed ? item.amount !== null : item.amount === null
   );
@@ -184,13 +181,12 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({
 
       <Stack spacing={2}>
         {displayItems.map((item) => {
-          // 重要: filterされた配列ではなく、元の「items（全アイテム）」配列からインデックスを探す
           const actualIndex = items.indexOf(item);
 
           return (
             <RecurringItemRow
-              // key に index を使うのは避け、一意になるような値を生成
-              key={`row-${isFixed}-${actualIndex}-${item.categoryId}`}
+              // key に index ではなく tempId を使用することで安全に描画
+              key={item.tempId}
               item={item}
               index={actualIndex}
               categories={categories}

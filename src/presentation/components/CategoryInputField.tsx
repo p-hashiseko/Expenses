@@ -1,42 +1,35 @@
+import { Box, InputAdornment, InputBase, TextField, Typography } from '@mui/material';
+
 import React from 'react';
-import { Box, Typography, TextField, InputAdornment } from '@mui/material';
+
 import { APP_COLORS } from '../../color.config';
+import { formatCurrency, sanitizeNumericInput } from '../../uitls/formatters';
+
+// 先ほど作成した関数をインポート（パスは環境に合わせて調整してください）
 
 interface CategoryInputFieldProps {
   label: string;
-  value: string;         // 現在入力中の値（カンマなしの文字列）
-  alreadyPaid: number;   // すでに入力済みの合計金額
-  onChange: (rawVal: string) => void; // 入力値が変更された時のコールバック
-  onBlur?: () => void;   // フォーカスが外れた時のコールバック
+  value: string;
+  memoValue: string;
+  alreadyPaid: number;
+  onChange: (rawVal: string) => void;
+  onMemoChange: (val: string) => void;
+  onBlur?: () => void;
 }
 
-export const CategoryInputField: React.FC<CategoryInputFieldProps> = ({ 
-  label, 
-  value, 
+export const CategoryInputField: React.FC<CategoryInputFieldProps> = ({
+  label,
+  value,
+  memoValue,
   alreadyPaid,
   onChange,
-  onBlur
+  onMemoChange,
+  onBlur,
 }) => {
-  
-  /**
-   * 入力値のバリデーションと整形
-   */
+  // 共通関数を呼び出す
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // 表示用のカンマを除去
-    const rawValue = e.target.value.replace(/,/g, '');
-    
-    // 空文字を許可しつつ、数値以外が入らないようにチェック
-    if (rawValue !== "" && !/^[0-9]+$/.test(rawValue)) return;
-    
-    onChange(rawValue);
-  };
-
-  /**
-   * 数値を 1,234 形式の文字列に変換
-   */
-  const formatDisplayValue = (val: string) => {
-    if (!val || val === "") return "";
-    return Number(val).toLocaleString();
+    const sanitized = sanitizeNumericInput(e.target.value);
+    onChange(sanitized);
   };
 
   return (
@@ -44,70 +37,70 @@ export const CategoryInputField: React.FC<CategoryInputFieldProps> = ({
       sx={{
         py: 1.5,
         borderBottom: `1px solid ${APP_COLORS.lightGray}50`,
-        transition: 'background-color 0.2s',
-        '&:hover': {
-          bgcolor: 'rgba(0,0,0,0.01)', // 軽くホバー感を出して操作性を向上
-        },
+        display: 'flex',
+        alignItems: 'center',
       }}
     >
-      <Box display="flex" alignItems="center" justifyContent="space-between">
-        {/* 左側：カテゴリ情報エリア */}
-        <Box sx={{ flex: 1 }}>
+      {/* 1. カテゴリ情報 */}
+      <Box sx={{ width: '85px', flexShrink: 0 }}>
+        <Typography sx={{ fontWeight: 'bold', color: APP_COLORS.textPrimary, fontSize: '0.9rem' }}>
+          {label}
+        </Typography>
+        {alreadyPaid > 0 && (
           <Typography
-            sx={{
-              fontWeight: 'bold',
-              color: APP_COLORS.textPrimary,
-              fontSize: '1rem',
-            }}
+            sx={{ fontSize: '11px', color: APP_COLORS.mainGreen, fontWeight: '500', mt: 0.2 }}
           >
-            {label}
+            計 {alreadyPaid.toLocaleString()}
           </Typography>
-
-          <Typography
-            sx={{
-              fontSize: '12px',
-              color: APP_COLORS.darkGreen,
-              fontWeight: '500',
-              mt: 0.5,
-            }}
-          >
-            合計: {alreadyPaid.toLocaleString()}円
-          </Typography>
-        </Box>
-
-        {/* 右側：入力エリア */}
-        <TextField
-          variant="standard"
-          placeholder="追加"
-          value={formatDisplayValue(value)}
-          onChange={handleTextChange}
-          onBlur={onBlur} // フォーカスが外れた時に合計処理を実行
-          sx={{
-            width: '110px',
-            '& .MuiInput-underline:after': {
-              borderBottomColor: APP_COLORS.mainGreen,
-            },
-            '& .MuiInput-underline:before': {
-              borderBottomColor: APP_COLORS.lightGray,
-            },
-          }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Typography sx={{ color: APP_COLORS.textPrimary, fontSize: '14px' }}>円</Typography>
-              </InputAdornment>
-            ),
-            inputMode: 'numeric', // スマホで数字キーボードを表示
-            inputProps: {
-              style: {
-                textAlign: 'right',
-                fontWeight: 'bold',
-                color: APP_COLORS.textPrimary,
-              },
-            },
-          }}
-        />
+        )}
       </Box>
+
+      <Box sx={{ flexGrow: 1 }} />
+
+      {/* 2. 金額入力 */}
+      <TextField
+        variant="standard"
+        placeholder="0"
+        value={formatCurrency(value)} // 共通関数を使用
+        onChange={handleTextChange}
+        onBlur={onBlur}
+        sx={{
+          width: '90px',
+          flexShrink: 0,
+          '& .MuiInput-underline:after': { borderBottomColor: APP_COLORS.mainGreen },
+        }}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <Typography variant="body2" sx={{ color: APP_COLORS.textPrimary }}>
+                円
+              </Typography>
+            </InputAdornment>
+          ),
+          inputMode: 'numeric',
+          inputProps: {
+            style: { textAlign: 'right', fontSize: '1rem', fontWeight: '400' },
+          },
+        }}
+      />
+
+      {/* 3. メモ入力 */}
+      <InputBase
+        placeholder="メモ"
+        value={memoValue}
+        onChange={(e) => onMemoChange(e.target.value)}
+        sx={{
+          width: '120px',
+          fontSize: '0.85rem',
+          bgcolor: 'rgba(0,0,0,0.03)',
+          px: 1,
+          py: 0.4,
+          borderRadius: 1,
+          color: APP_COLORS.textPrimary,
+          ml: 1.5,
+          fontWeight: '400',
+        }}
+      />
     </Box>
   );
 };
