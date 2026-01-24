@@ -5,14 +5,14 @@ export const ExpensesRepository = {
   /**
    * 今日のカテゴリごとの合計支出を取得する
    */
-  async getTodayTotals(userId: string): Promise<{ [key: string]: number }> {
-    const today = new Date().toISOString().split('T')[0];
+  async getTodayTotals(userId: string, date?: string): Promise<{ [key: string]: number }> {
+    const targetDate = date || new Date().toISOString().split('T')[0];
 
     const { data, error } = await supabase
       .from('expenses')
       .select('category_id, amount')
       .eq('user_id', userId)
-      .eq('payment_date', today);
+      .eq('payment_date', targetDate);
 
     if (error) throw error;
 

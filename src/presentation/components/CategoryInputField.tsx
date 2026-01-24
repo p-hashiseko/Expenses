@@ -5,8 +5,6 @@ import React from 'react';
 import { APP_COLORS } from '../../color.config';
 import { formatCurrency, sanitizeNumericInput } from '../../uitls/formatters';
 
-// 先ほど作成した関数をインポート（パスは環境に合わせて調整してください）
-
 interface CategoryInputFieldProps {
   label: string;
   value: string;
@@ -15,6 +13,7 @@ interface CategoryInputFieldProps {
   onChange: (rawVal: string) => void;
   onMemoChange: (val: string) => void;
   onBlur?: () => void;
+  showMemo?: boolean; // 追加：メモを表示するかどうかの判定
 }
 
 export const CategoryInputField: React.FC<CategoryInputFieldProps> = ({
@@ -25,8 +24,8 @@ export const CategoryInputField: React.FC<CategoryInputFieldProps> = ({
   onChange,
   onMemoChange,
   onBlur,
+  showMemo = true, // デフォルトは表示（支出入力用）
 }) => {
-  // 共通関数を呼び出す
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sanitized = sanitizeNumericInput(e.target.value);
     onChange(sanitized);
@@ -61,7 +60,7 @@ export const CategoryInputField: React.FC<CategoryInputFieldProps> = ({
       <TextField
         variant="standard"
         placeholder="0"
-        value={formatCurrency(value)} // 共通関数を使用
+        value={formatCurrency(value)}
         onChange={handleTextChange}
         onBlur={onBlur}
         sx={{
@@ -79,28 +78,36 @@ export const CategoryInputField: React.FC<CategoryInputFieldProps> = ({
           ),
           inputMode: 'numeric',
           inputProps: {
-            style: { textAlign: 'right', fontSize: '1rem', fontWeight: '400' },
+            // 文字色を textPrimary に固定
+            style: {
+              textAlign: 'right',
+              fontSize: '1rem',
+              fontWeight: '400',
+              color: APP_COLORS.textPrimary,
+            },
           },
         }}
       />
 
-      {/* 3. メモ入力 */}
-      <InputBase
-        placeholder="メモ"
-        value={memoValue}
-        onChange={(e) => onMemoChange(e.target.value)}
-        sx={{
-          width: '120px',
-          fontSize: '0.85rem',
-          bgcolor: 'rgba(0,0,0,0.03)',
-          px: 1,
-          py: 0.4,
-          borderRadius: 1,
-          color: APP_COLORS.textPrimary,
-          ml: 1.5,
-          fontWeight: '400',
-        }}
-      />
+      {/* 3. メモ入力（判定による表示切り替え） */}
+      {showMemo && (
+        <InputBase
+          placeholder="メモ"
+          value={memoValue}
+          onChange={(e) => onMemoChange(e.target.value)}
+          sx={{
+            width: '120px',
+            fontSize: '0.85rem',
+            bgcolor: 'rgba(0,0,0,0.03)',
+            px: 1,
+            py: 0.4,
+            borderRadius: 1,
+            color: APP_COLORS.textPrimary,
+            ml: 1.5,
+            fontWeight: '400',
+          }}
+        />
+      )}
     </Box>
   );
 };

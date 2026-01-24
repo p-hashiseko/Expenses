@@ -2,9 +2,10 @@ import {
   Category,
   ChevronRight,
   Logout,
-  Payments, // 給料用のアイコンを追加
+  Payments,
   Person,
   Receipt,
+  TrackChanges, // 目標用のアイコンを追加
 } from '@mui/icons-material';
 import {
   Box,
@@ -26,11 +27,12 @@ import { useAuth } from '../../state/AuthContext';
 import { AccountInfo } from './setting/AccountInfo';
 import { CategoriesSetting } from './setting/CategoriesSetting';
 import { FixedCostSetting } from './setting/FixedCostSetting';
+import { ObjectiveSetting } from './setting/ObjectiveSetting';
 import { SalarySetting } from './setting/SlarySetting';
 
-// 今後作成する画面
+// ※今後作成する目標設定コンポーネント（仮）
+// import { ObjectiveSetting } from './setting/ObjectiveSetting';
 
-// 親コンポーネントから呼び出すための型定義
 export interface SettingsTabHandle {
   resetView: () => void;
 }
@@ -38,12 +40,11 @@ export interface SettingsTabHandle {
 export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
   const { signOut } = useAuth();
 
-  // 表示する画面を管理するステート（'salary' を追加）
+  // 表示する画面を管理するステート（'objective' を追加）
   const [currentView, setCurrentView] = useState<
-    'menu' | 'categories' | 'account' | 'fixed' | 'salary'
+    'menu' | 'categories' | 'account' | 'fixed' | 'salary' | 'objective'
   >('menu');
 
-  // 親コンポーネント（DashboardPage等）からアクセス可能にする関数
   useImperativeHandle(ref, () => ({
     resetView: () => {
       setCurrentView('menu');
@@ -75,6 +76,10 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
 
   if (currentView === 'salary') {
     return <SalarySetting onBack={() => setCurrentView('menu')} />;
+  }
+
+  if (currentView === 'objective') {
+    return <ObjectiveSetting onBack={() => setCurrentView('menu')} />;
   }
 
   // --- メインメニュー (currentView === 'menu') ---
@@ -125,7 +130,7 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
                 <Category />
               </ListItemIcon>
               <ListItemText
-                primary="カテゴリ設定"
+                primary="カテゴリの設定"
                 primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.textPrimary }}
               />
               <ChevronRight sx={{ color: APP_COLORS.lightGray }} />
@@ -134,14 +139,14 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
 
           <Divider sx={{ borderColor: APP_COLORS.lightGray }} />
 
-          {/* 固定費の設定 */}
+          {/* 固定費・変動費の設定 */}
           <ListItem disablePadding>
             <ListItemButton onClick={() => setCurrentView('fixed')}>
               <ListItemIcon sx={{ color: APP_COLORS.mainGreen }}>
                 <Receipt />
               </ListItemIcon>
               <ListItemText
-                primary="固定費の設定"
+                primary="固定費・変動費の設定" // 名称変更
                 primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.textPrimary }}
               />
               <ChevronRight sx={{ color: APP_COLORS.lightGray }} />
@@ -158,6 +163,22 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
               </ListItemIcon>
               <ListItemText
                 primary="給料の設定"
+                primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.textPrimary }}
+              />
+              <ChevronRight sx={{ color: APP_COLORS.lightGray }} />
+            </ListItemButton>
+          </ListItem>
+
+          <Divider sx={{ borderColor: APP_COLORS.lightGray }} />
+
+          {/* 目標の設定（新規追加） */}
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => setCurrentView('objective')}>
+              <ListItemIcon sx={{ color: APP_COLORS.mainGreen }}>
+                <TrackChanges />
+              </ListItemIcon>
+              <ListItemText
+                primary="目標の設定"
                 primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.textPrimary }}
               />
               <ChevronRight sx={{ color: APP_COLORS.lightGray }} />

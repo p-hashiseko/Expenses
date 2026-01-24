@@ -1,5 +1,18 @@
-import { CalendarToday } from '@mui/icons-material';
-import { Box, CircularProgress, Paper, Stack, Typography } from '@mui/material';
+import { CalendarToday, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import {
+  Box,
+  CircularProgress,
+  IconButton,
+  InputAdornment,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { addDays, format, subDays } from 'date-fns';
+import { ja } from 'date-fns/locale';
 
 import React, { useEffect, useState } from 'react';
 
@@ -15,33 +28,49 @@ import { useAuth } from '../../state/AuthContext';
 export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false }) => {
   const { user } = useAuth();
 
+  // 1. 状態管理
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [categories, setCategories] = useState<Category[]>([]);
   const [baseAmountMap, setBaseAmountMap] = useState<{ [key: string]: number }>({});
   const [amountInputs, setAmountInputs] = useState<{ [key: string]: string }>({});
-  const [memoInputs, setMemoInputs] = useState<{ [key: string]: string }>({}); // メモ用State
+  const [memoInputs, setMemoInputs] = useState<{ [key: string]: string }>({});
   const [displayTotalMap, setDisplayTotalMap] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState(true);
   const [savingLocal, setSavingLocal] = useState(false);
 
-  const isSaving = saving || savingLocal;
-  const today = new Date();
-  const dateString = `${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`;
-  const isoDate = today.toISOString().split('T')[0]; // YYYY-MM-DD
+  // カレンダーの開閉状態
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
+  const isSaving = saving || savingLocal;
+
+  // 2. 日付操作
+  const handlePrevDay = () => {
+    if (selectedDate) setSelectedDate(subDays(selectedDate, 1));
+  };
+
+  const handleNextDay = () => {
+    if (selectedDate) setSelectedDate(addDays(selectedDate, 1));
+  };
+
+  // 3. データ取得
   useEffect(() => {
     let isMounted = true;
-    const fetchInitialData = async () => {
-      if (!user) return;
+    const fetchData = async () => {
+      if (!user || !selectedDate) return;
       try {
         setLoading(true);
-        const [catData, todayTotals] = await Promise.all([
+        const isoDate = format(selectedDate, 'yyyy-MM-dd');
+        const [catData, dayTotals] = await Promise.all([
           CategoryRepository.getCategories(user.id),
-          ExpensesRepository.getTodayTotals(user.id),
+          ExpensesRepository.getTodayTotals(user.id, isoDate),
         ]);
+
         if (isMounted) {
           setCategories(catData);
-          setBaseAmountMap(todayTotals || {});
-          setDisplayTotalMap(todayTotals || {});
+          setBaseAmountMap(dayTotals || {});
+          setDisplayTotalMap(dayTotals || {});
+          setAmountInputs({});
+          setMemoInputs({});
         }
       } catch (error) {
         console.error('データ取得失敗:', error);
@@ -49,37 +78,24 @@ export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false
         if (isMounted) setLoading(false);
       }
     };
-    fetchInitialData();
+    fetchData();
     return () => {
       isMounted = false;
     };
-  }, [user]);
+  }, [user, selectedDate]);
 
-  const handleAmountChange = (id: string, val: string) => {
-    setAmountInputs((prev) => ({ ...prev, [id]: val }));
-  };
-
-  const handleMemoChange = (id: string, val: string) => {
-    setMemoInputs((prev) => ({ ...prev, [id]: val }));
-  };
-
-  const handleBlur = (id: string) => {
-    const inputValue = parseInt(amountInputs[id] || '0', 10);
-    const baseValue = baseAmountMap[id] || 0;
-    setDisplayTotalMap((prev) => ({ ...prev, [id]: baseValue + inputValue }));
-  };
-
+  // 4. 保存処理
   const handleSave = async () => {
-    if (!user) return;
+    if (!user || !selectedDate) return;
 
-    // 金額が入っているものだけを抽出してExpenseモデルに変換
+    const isoDate = format(selectedDate, 'yyyy-MM-dd');
     const transactionsToSave: Expense[] = Object.entries(amountInputs)
-      .filter(([_, value]) => value !== '' && parseInt(value) > 0)
+      .filter(([_, value]) => value !== '' && parseInt(value, 10) > 0)
       .map(([categoryId, value]) => ({
         userId: user.id,
         categoryId: categoryId,
-        amount: parseInt(value),
-        memo: memoInputs[categoryId] || null, // メモがあれば入れる
+        amount: parseInt(value, 10),
+        memo: memoInputs[categoryId] || null,
         paymentDate: isoDate,
       }));
 
@@ -91,16 +107,13 @@ export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false
     try {
       setSavingLocal(true);
       await ExpensesRepository.saveExpenses(transactionsToSave);
-
-      const updatedTotals = await ExpensesRepository.getTodayTotals(user.id);
+      const updatedTotals = await ExpensesRepository.getTodayTotals(user.id, isoDate);
       setBaseAmountMap(updatedTotals);
       setDisplayTotalMap(updatedTotals);
       setAmountInputs({});
-      setMemoInputs({}); // メモもリセット
-
+      setMemoInputs({});
       alert('記録しました！');
     } catch (error) {
-      console.error('保存エラー:', error);
       alert('保存に失敗しました');
     } finally {
       setSavingLocal(false);
@@ -116,60 +129,117 @@ export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false
   }
 
   return (
-    <Box>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          mb: 3,
-          p: 2,
-          bgcolor: APP_COLORS.white,
-          borderRadius: 2,
-          boxShadow: `0 2px 8px ${APP_COLORS.lightGray}`,
-        }}
-      >
-        <CalendarToday sx={{ color: APP_COLORS.mainGreen, mr: 1, fontSize: 20 }} />
-        <Typography sx={{ fontWeight: 'bold', color: APP_COLORS.textPrimary }}>
-          今日の支出を入力: {dateString}
-        </Typography>
+    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ja}>
+      <Box>
+        {/* 日付選択ヘッダー */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mb: 3,
+            gap: 1, // 要素間の隙間を調整
+          }}
+        >
+          {/* 左矢印ボタン */}
+          <IconButton onClick={handlePrevDay} sx={{ color: APP_COLORS.mainGreen }}>
+            <ChevronLeft />
+          </IconButton>
+
+          {/* インプット形式の日付選択エリア */}
+          <DatePicker
+            open={isCalendarOpen}
+            onOpen={() => setIsCalendarOpen(true)}
+            onClose={() => setIsCalendarOpen(false)}
+            value={selectedDate}
+            onChange={(newValue) => setSelectedDate(newValue)}
+            format="yyyy/MM/dd"
+            // デフォルトのアイコンボタンを非表示にし、自作のAdornmentを使う
+            slots={{ openPickerIcon: () => null }}
+            slotProps={{
+              textField: {
+                onClick: () => setIsCalendarOpen(true),
+                variant: 'outlined', // 枠線のあるインプット形式
+                size: 'small',
+                InputProps: {
+                  readOnly: true,
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <CalendarToday
+                        sx={{ fontSize: 18, color: APP_COLORS.mainGreen, cursor: 'pointer' }}
+                      />
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    cursor: 'pointer',
+                    borderRadius: '12px', // 角を丸く
+                    bgcolor: 'white',
+                    fontWeight: 'bold',
+                    width: '180px', // アイコンを含めた幅を確保
+                    '& fieldset': {
+                      borderColor: APP_COLORS.lightGray, // 枠線の色
+                    },
+                    '&:hover fieldset': {
+                      borderColor: APP_COLORS.mainGreen, // ホバー時の色
+                    },
+                  },
+                },
+                sx: {
+                  '& .MuiInputBase-input': {
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    color: APP_COLORS.textPrimary,
+                  },
+                },
+              },
+            }}
+          />
+
+          {/* 右矢印ボタン */}
+          <IconButton onClick={handleNextDay} sx={{ color: APP_COLORS.mainGreen }}>
+            <ChevronRight />
+          </IconButton>
+        </Box>
+
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            border: `1px solid ${APP_COLORS.lightGray}`,
+            bgcolor: 'white',
+          }}
+        >
+          <Stack spacing={0}>
+            {categories.map((cat) => (
+              <CategoryInputField
+                key={cat.id}
+                label={cat.category_name}
+                alreadyPaid={displayTotalMap[cat.id] || 0}
+                value={amountInputs[cat.id] || ''}
+                memoValue={memoInputs[cat.id] || ''}
+                onChange={(val) => setAmountInputs((prev) => ({ ...prev, [cat.id]: val }))}
+                onMemoChange={(val) => setMemoInputs((prev) => ({ ...prev, [cat.id]: val }))}
+                onBlur={() => {
+                  const val = parseInt(amountInputs[cat.id] || '0', 10);
+                  setDisplayTotalMap((prev) => ({
+                    ...prev,
+                    [cat.id]: (baseAmountMap[cat.id] || 0) + val,
+                  }));
+                }}
+              />
+            ))}
+          </Stack>
+        </Paper>
+
+        <Box sx={{ mt: 4 }}>
+          <PrimaryActionButton onClick={handleSave} disabled={isSaving}>
+            {isSaving
+              ? '記録中...'
+              : `${selectedDate ? format(selectedDate, 'M/d') : ''} の支出を記録する`}
+          </PrimaryActionButton>
+        </Box>
       </Box>
-
-      <Paper
-        elevation={0}
-        sx={{
-          p: 2,
-          borderRadius: 3,
-          border: `1px solid ${APP_COLORS.lightGray}`,
-          bgcolor: 'white',
-        }}
-      >
-        <Stack spacing={0}>
-          {categories.length === 0 && (
-            <Typography sx={{ p: 2, textAlign: 'center', color: APP_COLORS.textPrimary }}>
-              カテゴリを登録してください
-            </Typography>
-          )}
-
-          {categories.map((cat) => (
-            <CategoryInputField
-              key={cat.id}
-              label={cat.category_name}
-              alreadyPaid={displayTotalMap[cat.id] || 0}
-              value={amountInputs[cat.id] || ''}
-              memoValue={memoInputs[cat.id] || ''}
-              onChange={(val) => handleAmountChange(cat.id, val)}
-              onMemoChange={(val) => handleMemoChange(cat.id, val)}
-              onBlur={() => handleBlur(cat.id)}
-            />
-          ))}
-        </Stack>
-      </Paper>
-
-      <Box sx={{ mt: 4 }}>
-        <PrimaryActionButton onClick={handleSave} disabled={isSaving}>
-          {isSaving ? '記録中...' : '今日の支出を記録する'}
-        </PrimaryActionButton>
-      </Box>
-    </Box>
+    </LocalizationProvider>
   );
 };

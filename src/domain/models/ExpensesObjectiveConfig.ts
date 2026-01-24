@@ -1,14 +1,8 @@
-// DBの構造と1対1で対応するモデル
-export interface ExpensesObjectiveConfig {
+export interface ExpensesObjectiveConfigFront {
+  tempId: string;
   id?: string;
   userId: string;
-  day: number;
   categoryId: string;
-  amount: number | null;
-  memo: string;
-}
-
-// フロントエンド専用：一意識別のための tempId を追加
-export interface ExpensesObjectiveConfigFront extends ExpensesObjectiveConfig {
-  tempId: string;
+  amount: number | null; // objective_amount
+  day: number; // payment_due_date
 }
