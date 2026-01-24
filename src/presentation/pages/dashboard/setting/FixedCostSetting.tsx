@@ -1,22 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  IconButton,
-  Stack,
-  Button,
-  CircularProgress,
-  Divider,
-} from '@mui/material';
-import { ArrowBack, Add, ReceiptLong, Tune } from '@mui/icons-material';
+import { Add, ArrowBack, ReceiptLong, Tune } from '@mui/icons-material';
+import { Box, CircularProgress, Divider, IconButton, Stack, Typography } from '@mui/material';
 
-import { useAuth } from '../../../state/AuthContext';
-import { CategoryRepository } from '../../../../infrastructure/repositories/CategoryRepository';
+import React, { useEffect, useState } from 'react';
+
 import { APP_COLORS } from '../../../../color.config';
 import type { Category } from '../../../../domain/models/Category';
+import { CategoryRepository } from '../../../../infrastructure/repositories/CategoryRepository';
 import { ExpensesObjectiveConfigRepository } from '../../../../infrastructure/repositories/ExpensesObjectiveConfigRepository';
-import { RecurringItemRow } from '../../../components/RecurringItemRow';
 import { PrimaryActionButton } from '../../../components/PrimaryActionButton';
+import { RecurringItemRow } from '../../../components/RecurringItemRow';
+import { useAuth } from '../../../state/AuthContext';
 
 interface RecurringItem {
   id?: string;
