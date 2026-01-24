@@ -1,1 +1,0 @@
-export const AnalyticsTab = () => <div>分析画面（グラフなど）</div>;

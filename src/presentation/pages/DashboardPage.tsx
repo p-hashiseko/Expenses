@@ -1,28 +1,28 @@
-import React, { useState, useRef } from 'react';
-import { Box, Paper, BottomNavigation, BottomNavigationAction, Container } from '@mui/material';
-import { PieChart, Create, Settings, Flag } from '@mui/icons-material';
+import { Create, Flag, PieChart, Settings } from '@mui/icons-material';
+import { BottomNavigation, BottomNavigationAction, Box, Container, Paper } from '@mui/material';
 
-import { Header } from '../components/Header';
-import { RegistrationTab } from './dashboard/RegistrationTab';
-import { ConfigTab } from './dashboard/ConfigTab';
-import { AnalyticsTab } from './dashboard/AnalyticsTab';
-// SettingsTabHandle を追加でインポート
-import { SettingsTab, type SettingsTabHandle } from './dashboard/SettingsTab';
+import React, { useRef, useState } from 'react';
 
 import { APP_COLORS } from '../../color.config';
+import { Header } from '../components/Header';
+import { AnalysisTab } from './dashboard/AnalysisTab';
+import { ConfigTab } from './dashboard/ConfigTab';
+import { RegistrationTab } from './dashboard/RegistrationTab';
+// SettingsTabHandle を追加でインポート
+import { SettingsTab, type SettingsTabHandle } from './dashboard/SettingsTab';
 
 type TabType = 'registration' | 'analytics' | 'config' | 'setting';
 
 export const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('registration');
-  
+
   // SettingsTab のメソッドを呼ぶための Ref を作成
   const settingsTabRef = useRef<SettingsTabHandle>(null);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'analytics':
-        return <AnalyticsTab />;
+        return <AnalysisTab />;
       case 'registration':
         return <RegistrationTab />;
       case 'config':
@@ -45,42 +45,44 @@ export const DashboardPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      minHeight: '100vh', 
-      bgcolor: APP_COLORS.background 
-    }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        bgcolor: APP_COLORS.background,
+      }}
+    >
       <Header />
 
-      <Container 
-        maxWidth="sm" 
-        sx={{ 
-          flex: 1, 
-          py: 3, 
-          pb: 10, 
-          color: APP_COLORS.textPrimary 
+      <Container
+        maxWidth="sm"
+        sx={{
+          flex: 1,
+          py: 3,
+          pb: 10,
+          color: APP_COLORS.textPrimary,
         }}
       >
         {renderContent()}
       </Container>
 
-      <Paper 
-        sx={{ 
-          position: 'fixed', 
-          bottom: 0, 
-          left: 0, 
-          right: 0, 
+      <Paper
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
           zIndex: 1000,
-          borderRadius: '16px 16px 0 0'
-        }} 
+          borderRadius: '16px 16px 0 0',
+        }}
         elevation={4}
       >
         <BottomNavigation
           showLabels
           value={activeTab}
           onChange={handleTabChange} // ハンドラを外部定義のものに変更
-          sx={{ 
+          sx={{
             height: 70,
             '& .MuiBottomNavigationAction-root': {
               color: APP_COLORS.textPrimary,

@@ -1,14 +1,5 @@
 import { CalendarToday, ChevronLeft, ChevronRight } from '@mui/icons-material';
-import {
-  Box,
-  CircularProgress,
-  IconButton,
-  InputAdornment,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, CircularProgress, IconButton, InputAdornment, Paper, Stack } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { addDays, format, subDays } from 'date-fns';
