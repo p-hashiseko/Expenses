@@ -21,9 +21,9 @@ import {
 // プロジェクト固有のインポート
 import { APP_COLORS } from '../../../color.config';
 import { useAuth } from '../../state/AuthContext';
-import { AccountInfo } from './setting/accountInfo';
-import { FixedCostSetting } from './setting/fixedCostSetting';
 import { CategoriesSetting } from './setting/CategoriesSetting';
+import { AccountInfo } from './setting/AccountInfo';
+import { FixedCostSetting } from './setting/FixedCostSetting';
 
 // 親コンポーネントから呼び出すための型定義
 export interface SettingsTabHandle {
@@ -32,15 +32,17 @@ export interface SettingsTabHandle {
 
 export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
   const { signOut } = useAuth();
-  
+
   // 表示する画面を管理するステート（'fixed' を追加）
-  const [currentView, setCurrentView] = useState<'menu' | 'categories' | 'account' | 'fixed'>('menu');
+  const [currentView, setCurrentView] = useState<'menu' | 'categories' | 'account' | 'fixed'>(
+    'menu'
+  );
 
   // 親コンポーネント（DashboardPage等）からアクセス可能にする関数
   useImperativeHandle(ref, () => ({
     resetView: () => {
       setCurrentView('menu');
-    }
+    },
   }));
 
   const handleLogout = async () => {
@@ -69,25 +71,25 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
   // --- メインメニュー (currentView === 'menu') ---
   return (
     <Box sx={{ p: 1, bgcolor: APP_COLORS.background, minHeight: '100%' }}>
-      <Typography 
-        variant="h6" 
-        sx={{ 
-          mb: 2, 
+      <Typography
+        variant="h6"
+        sx={{
+          mb: 2,
           pl: 1,
-          fontWeight: 'bold', 
-          color: APP_COLORS.textPrimary 
+          fontWeight: 'bold',
+          color: APP_COLORS.textPrimary,
         }}
       >
         設定
       </Typography>
 
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          borderRadius: 3, 
-          border: `1px solid ${APP_COLORS.lightGray}`, 
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 3,
+          border: `1px solid ${APP_COLORS.lightGray}`,
           overflow: 'hidden',
-          bgcolor: APP_COLORS.white 
+          bgcolor: APP_COLORS.white,
         }}
       >
         <List disablePadding>
@@ -97,14 +99,14 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
               <ListItemIcon sx={{ color: APP_COLORS.mainGreen }}>
                 <Person />
               </ListItemIcon>
-              <ListItemText 
-                primary="アカウント情報" 
-                primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.textPrimary }} 
+              <ListItemText
+                primary="アカウント情報"
+                primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.textPrimary }}
               />
               <ChevronRight sx={{ color: APP_COLORS.lightGray }} />
             </ListItemButton>
           </ListItem>
-          
+
           <Divider sx={{ borderColor: APP_COLORS.lightGray }} />
 
           {/* カテゴリ設定 */}
@@ -113,9 +115,9 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
               <ListItemIcon sx={{ color: APP_COLORS.mainGreen }}>
                 <Category />
               </ListItemIcon>
-              <ListItemText 
-                primary="カテゴリ設定" 
-                primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.textPrimary }} 
+              <ListItemText
+                primary="カテゴリ設定"
+                primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.textPrimary }}
               />
               <ChevronRight sx={{ color: APP_COLORS.lightGray }} />
             </ListItemButton>
@@ -129,28 +131,28 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
               <ListItemIcon sx={{ color: APP_COLORS.mainGreen }}>
                 <Receipt />
               </ListItemIcon>
-              <ListItemText 
-                primary="固定費の設定" 
-                primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.textPrimary }} 
+              <ListItemText
+                primary="固定費の設定"
+                primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.textPrimary }}
               />
               <ChevronRight sx={{ color: APP_COLORS.lightGray }} />
             </ListItemButton>
           </ListItem>
 
           <Divider sx={{ borderColor: APP_COLORS.lightGray }} />
-          
+
           {/* ログアウト */}
           <ListItem disablePadding>
-            <ListItemButton 
+            <ListItemButton
               onClick={handleLogout}
               sx={{ '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.08)' } }}
             >
               <ListItemIcon sx={{ color: APP_COLORS.error }}>
                 <Logout />
               </ListItemIcon>
-              <ListItemText 
-                primary="ログアウト" 
-                primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.error }} 
+              <ListItemText
+                primary="ログアウト"
+                primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.error }}
               />
               <ChevronRight sx={{ color: APP_COLORS.lightGray }} />
             </ListItemButton>
@@ -159,10 +161,7 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
       </Paper>
 
       <Box sx={{ mt: 4, textAlign: 'center' }}>
-        <Typography 
-          variant="caption" 
-          sx={{ color: APP_COLORS.textPrimary, opacity: 0.5 }}
-        >
+        <Typography variant="caption" sx={{ color: APP_COLORS.textPrimary, opacity: 0.5 }}>
           家計簿アプリ Version 1.0.0
         </Typography>
       </Box>

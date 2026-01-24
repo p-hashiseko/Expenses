@@ -21,12 +21,17 @@ export const DashboardPage: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'analytics': return <AnalyticsTab />;
-      case 'registration': return <RegistrationTab />;
-      case 'config': return <ConfigTab />;
+      case 'analytics':
+        return <AnalyticsTab />;
+      case 'registration':
+        return <RegistrationTab />;
+      case 'config':
+        return <ConfigTab />;
       // ref を渡すように変更
-      case 'setting': return <SettingsTab ref={settingsTabRef} />;
-      default: return <RegistrationTab />;
+      case 'setting':
+        return <SettingsTab ref={settingsTabRef} />;
+      default:
+        return <RegistrationTab />;
     }
   };
 

@@ -67,9 +67,7 @@ async saveCategoriesOrdered(userId: string, categories: any[]) {
   }
 
   // 2. アップサート（IDがあれば更新、なければ新規挿入）
-  const { error } = await supabase
-    .from('categories')
-    .upsert(categories);
+  const { error } = await supabase.from('categories').upsert(categories);
 
   if (error) throw error;
 }

@@ -39,11 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await AuthRepository.signOut();
   };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loading, signOut }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

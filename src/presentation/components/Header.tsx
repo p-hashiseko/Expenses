@@ -28,28 +28,28 @@ export const Header: React.FC = () => {
   }, [user]);
 
   return (
-    <AppBar 
-      position="sticky" 
-      elevation={0} 
-      sx={{ 
-        bgcolor: APP_COLORS.white, 
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        bgcolor: APP_COLORS.white,
         borderBottom: `1px solid ${APP_COLORS.lightGray}`,
-        color: APP_COLORS.textPrimary
+        color: APP_COLORS.textPrimary,
       }}
     >
       <Toolbar>
-        <Typography 
-          variant="h6" 
-          component="div" 
-          sx={{ 
-            flexGrow: 1, 
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{
+            flexGrow: 1,
             fontWeight: 'bold',
-            color: APP_COLORS.mainGreen 
+            color: APP_COLORS.mainGreen,
           }}
         >
           家計簿アプリ
         </Typography>
-        
+
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {loading ? (
             <Skeleton variant="rounded" width={80} height={32} sx={{ borderRadius: '16px' }} />
@@ -58,11 +58,11 @@ export const Header: React.FC = () => {
               icon={<AccountCircle style={{ color: APP_COLORS.mainGreen }} />}
               label={username}
               variant="outlined"
-              sx={{ 
+              sx={{
                 borderColor: APP_COLORS.lightGray,
                 color: APP_COLORS.textPrimary,
                 fontWeight: '600',
-                px: 1
+                px: 1,
               }}
             />
           )}

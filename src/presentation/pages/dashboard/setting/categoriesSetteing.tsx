@@ -229,25 +229,32 @@ export const CategoriesSetting: React.FC<{ onBack: () => void }> = ({ onBack }) 
   return (
     <Box sx={{ p: 1, bgcolor: APP_COLORS.background, minHeight: '100vh' }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-        <IconButton onClick={onBack} sx={{ color: APP_COLORS.textPrimary }}><ArrowBack /></IconButton>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', color: APP_COLORS.textPrimary }}>カテゴリ設定</Typography>
+        <IconButton onClick={onBack} sx={{ color: APP_COLORS.textPrimary }}>
+          <ArrowBack />
+        </IconButton>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', color: APP_COLORS.textPrimary }}>
+          カテゴリ設定
+        </Typography>
       </Stack>
 
-      <DndContext 
+      <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <Paper elevation={0} sx={{ border: `1px solid ${APP_COLORS.lightGray}`, borderRadius: 4, overflow: 'hidden' }}>
-          <SortableContext items={rows.map(r => r.tempId)} strategy={verticalListSortingStrategy}>
+        <Paper
+          elevation={0}
+          sx={{ border: `1px solid ${APP_COLORS.lightGray}`, borderRadius: 4, overflow: 'hidden' }}
+        >
+          <SortableContext items={rows.map((r) => r.tempId)} strategy={verticalListSortingStrategy}>
             <Stack divider={<Box sx={{ borderBottom: `1px solid ${APP_COLORS.lightGray}` }} />}>
               {rows.map((row, index) => (
-                <SortableItem 
-                  key={row.tempId} 
-                  id={row.tempId} 
-                  index={index} 
-                  row={row} 
+                <SortableItem
+                  key={row.tempId}
+                  id={row.tempId}
+                  index={index}
+                  row={row}
                   onChange={handleChange}
                   onDelete={handleDelete}
                   isDragging={activeId === row.tempId}
@@ -259,7 +266,11 @@ export const CategoriesSetting: React.FC<{ onBack: () => void }> = ({ onBack }) 
       </DndContext>
 
       <Box sx={{ mt: 4, px: 1, pb: 10 }}>
-        <PrimaryActionButton onClick={handleSave} disabled={saving} sx={{ height: 56, borderRadius: 4 }}>
+        <PrimaryActionButton
+          onClick={handleSave}
+          disabled={saving}
+          sx={{ height: 56, borderRadius: 4 }}
+        >
           {saving ? '保存中...' : '変更を保存する'}
         </PrimaryActionButton>
       </Box>

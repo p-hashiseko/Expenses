@@ -18,16 +18,16 @@ export const PrimaryActionButton: React.FC<Props> = ({ children, onClick, disabl
       bgcolor: APP_COLORS.mainGreen,
       color: APP_COLORS.white,
       '&, & *': {
-        color: APP_COLORS.white
+        color: APP_COLORS.white,
       },
       '& svg': {
-        color: APP_COLORS.white
+        color: APP_COLORS.white,
       },
       fontWeight: 'bold',
       borderRadius: '12px',
       height: '56px',
       '&:hover': { bgcolor: APP_COLORS.darkGreen },
-      ...sx
+      ...sx,
     }}
   >
     {children}

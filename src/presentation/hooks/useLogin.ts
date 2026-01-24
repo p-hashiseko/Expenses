@@ -24,7 +24,7 @@ export const useLogin = () => {
     try {
       // Infrastructure層のリポジトリを呼び出し
       await AuthRepository.signInWithUsername(username, password);
-      
+
       // ログイン成功：ダッシュボード（ルートパス）へ遷移
       navigate('/');
     } catch (err: any) {

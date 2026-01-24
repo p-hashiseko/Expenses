@@ -36,8 +36,19 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       <Stack spacing={2}>
         {/* ユーザー名（メールの@より前を仮表示） */}
-        <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: `1px solid ${APP_COLORS.lightGray}`, bgcolor: APP_COLORS.white }}>
-          <Typography variant="caption" sx={{ color: APP_COLORS.textPrimary, opacity: 0.6, mb: 1, display: 'block' }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            border: `1px solid ${APP_COLORS.lightGray}`,
+            bgcolor: APP_COLORS.white,
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{ color: APP_COLORS.textPrimary, opacity: 0.6, mb: 1, display: 'block' }}
+          >
             ユーザー名
           </Typography>
           <TextField
@@ -52,14 +63,25 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   <Person sx={{ color: APP_COLORS.mainGreen }} />
                 </InputAdornment>
               ),
-              sx: { fontWeight: '600', color: APP_COLORS.textPrimary }
+              sx: { fontWeight: '600', color: APP_COLORS.textPrimary },
             }}
           />
         </Paper>
 
         {/* メールアドレス */}
-        <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: `1px solid ${APP_COLORS.lightGray}`, bgcolor: APP_COLORS.white }}>
-          <Typography variant="caption" sx={{ color: APP_COLORS.textPrimary, opacity: 0.6, mb: 1, display: 'block' }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            border: `1px solid ${APP_COLORS.lightGray}`,
+            bgcolor: APP_COLORS.white,
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{ color: APP_COLORS.textPrimary, opacity: 0.6, mb: 1, display: 'block' }}
+          >
             メールアドレス
           </Typography>
           <TextField
@@ -74,14 +96,25 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   <Email sx={{ color: APP_COLORS.mainGreen }} />
                 </InputAdornment>
               ),
-              sx: { fontWeight: '600', color: APP_COLORS.textPrimary }
+              sx: { fontWeight: '600', color: APP_COLORS.textPrimary },
             }}
           />
         </Paper>
 
         {/* パスワード（伏字のみ） */}
-        <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: `1px solid ${APP_COLORS.lightGray}`, bgcolor: APP_COLORS.white }}>
-          <Typography variant="caption" sx={{ color: APP_COLORS.textPrimary, opacity: 0.6, mb: 1, display: 'block' }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            border: `1px solid ${APP_COLORS.lightGray}`,
+            bgcolor: APP_COLORS.white,
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{ color: APP_COLORS.textPrimary, opacity: 0.6, mb: 1, display: 'block' }}
+          >
             パスワード
           </Typography>
           <TextField
@@ -97,7 +130,7 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   <Lock sx={{ color: APP_COLORS.mainGreen }} />
                 </InputAdornment>
               ),
-              sx: { fontWeight: '600', color: APP_COLORS.textPrimary }
+              sx: { fontWeight: '600', color: APP_COLORS.textPrimary },
             }}
           />
         </Paper>
@@ -117,7 +150,7 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             '&:hover': {
               borderColor: APP_COLORS.darkGreen,
               bgcolor: 'rgba(62, 207, 142, 0.04)',
-            }
+            },
           }}
           onClick={() => alert('パスワード再設定メールを送信する機能を今後実装予定です。')}
         >
@@ -127,7 +160,9 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       <Box sx={{ mt: 4, textAlign: 'center' }}>
         <Typography variant="caption" sx={{ color: APP_COLORS.textPrimary, opacity: 0.4 }}>
-          アカウントの管理についてお困りの場合は<br/>サポートまでお問い合わせください
+          アカウントの管理についてお困りの場合は
+          <br />
+          サポートまでお問い合わせください
         </Typography>
       </Box>
     </Box>

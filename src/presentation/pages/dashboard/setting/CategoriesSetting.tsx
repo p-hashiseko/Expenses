@@ -60,13 +60,13 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, index, row, onChange, o
   };
 
   return (
-    <Box 
-      ref={setNodeRef} 
+    <Box
+      ref={setNodeRef}
       style={style}
-      sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        p: 1.5, 
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        p: 1.5,
         bgcolor: APP_COLORS.white,
         boxShadow: isDragging ? '0 8px 20px rgba(0,0,0,0.15)' : 'none',
         borderRadius: isDragging ? 2 : 0,
@@ -77,8 +77,16 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, index, row, onChange, o
       <Box {...attributes} {...listeners} sx={{ cursor: 'grab', display: 'flex', mr: 1, p: 0.5 }}>
         <DragHandle sx={{ color: APP_COLORS.lightGray }} />
       </Box>
-      
-      <Typography sx={{ width: 35, color: APP_COLORS.textPrimary, opacity: 0.3, fontWeight: 'bold', fontSize: 13 }}>
+
+      <Typography
+        sx={{
+          width: 35,
+          color: APP_COLORS.textPrimary,
+          opacity: 0.3,
+          fontWeight: 'bold',
+          fontSize: 13,
+        }}
+      >
         {String(index + 1).padStart(2, '0')}
       </Typography>
 
@@ -88,16 +96,16 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, index, row, onChange, o
         placeholder="名称未設定"
         value={row.category_name || ''}
         onChange={(e) => onChange(index, e.target.value)}
-        InputProps={{ 
-          disableUnderline: true, 
-          sx: { px: 1, fontSize: 15, color: APP_COLORS.textPrimary, fontWeight: 500 } 
+        InputProps={{
+          disableUnderline: true,
+          sx: { px: 1, fontSize: 15, color: APP_COLORS.textPrimary, fontWeight: 500 },
         }}
       />
 
       {/* 削除ボタン: 名前がある場合のみ表示 */}
       {row.category_name && (
-        <IconButton 
-          size="small" 
+        <IconButton
+          size="small"
           onClick={() => onDelete(index)}
           sx={{ color: APP_COLORS.error, opacity: 0.6, '&:hover': { opacity: 1 } }}
         >

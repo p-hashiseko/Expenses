@@ -40,35 +40,41 @@ export const CategoryInputField: React.FC<CategoryInputFieldProps> = ({
   };
 
   return (
-    <Box sx={{ 
-      py: 1.5, 
-      borderBottom: `1px solid ${APP_COLORS.lightGray}50`,
-      transition: 'background-color 0.2s',
-      '&:hover': {
-        bgcolor: 'rgba(0,0,0,0.01)' // 軽くホバー感を出して操作性を向上
-      }
-    }}>
+    <Box
+      sx={{
+        py: 1.5,
+        borderBottom: `1px solid ${APP_COLORS.lightGray}50`,
+        transition: 'background-color 0.2s',
+        '&:hover': {
+          bgcolor: 'rgba(0,0,0,0.01)', // 軽くホバー感を出して操作性を向上
+        },
+      }}
+    >
       <Box display="flex" alignItems="center" justifyContent="space-between">
         {/* 左側：カテゴリ情報エリア */}
         <Box sx={{ flex: 1 }}>
-          <Typography sx={{ 
-            fontWeight: 'bold', 
-            color: APP_COLORS.textPrimary,
-            fontSize: '1rem' 
-          }}>
+          <Typography
+            sx={{
+              fontWeight: 'bold',
+              color: APP_COLORS.textPrimary,
+              fontSize: '1rem',
+            }}
+          >
             {label}
           </Typography>
-          
-          <Typography sx={{ 
-            fontSize: '12px', 
-            color: APP_COLORS.darkGreen,
-            fontWeight: '500',
-            mt: 0.5 
-          }}>
+
+          <Typography
+            sx={{
+              fontSize: '12px',
+              color: APP_COLORS.darkGreen,
+              fontWeight: '500',
+              mt: 0.5,
+            }}
+          >
             合計: {alreadyPaid.toLocaleString()}円
           </Typography>
         </Box>
-        
+
         {/* 右側：入力エリア */}
         <TextField
           variant="standard"
@@ -76,31 +82,29 @@ export const CategoryInputField: React.FC<CategoryInputFieldProps> = ({
           value={formatDisplayValue(value)}
           onChange={handleTextChange}
           onBlur={onBlur} // フォーカスが外れた時に合計処理を実行
-          sx={{ 
+          sx={{
             width: '110px',
-            '& .MuiInput-underline:after': { 
-              borderBottomColor: APP_COLORS.mainGreen 
+            '& .MuiInput-underline:after': {
+              borderBottomColor: APP_COLORS.mainGreen,
             },
             '& .MuiInput-underline:before': {
-              borderBottomColor: APP_COLORS.lightGray
-            }
+              borderBottomColor: APP_COLORS.lightGray,
+            },
           }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <Typography sx={{ color: APP_COLORS.textPrimary, fontSize: '14px' }}>
-                  円
-                </Typography>
+                <Typography sx={{ color: APP_COLORS.textPrimary, fontSize: '14px' }}>円</Typography>
               </InputAdornment>
             ),
             inputMode: 'numeric', // スマホで数字キーボードを表示
-            inputProps: { 
-              style: { 
+            inputProps: {
+              style: {
                 textAlign: 'right',
                 fontWeight: 'bold',
-                color: APP_COLORS.textPrimary
-              } 
-            }
+                color: APP_COLORS.textPrimary,
+              },
+            },
           }}
         />
       </Box>
