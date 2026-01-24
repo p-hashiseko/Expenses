@@ -1,34 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Box, Typography, Paper, TextField, IconButton, Stack, Button, CircularProgress 
-} from '@mui/material';
-import { ArrowBack, DragHandle, Delete } from '@mui/icons-material';
-
 // dnd-kit 関連
 import {
   DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
   type DragEndEvent,
   type DragStartEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
+  arrayMove,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
   useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { ArrowBack, Delete, DragHandle } from '@mui/icons-material';
+import {
+  Box,
+  CircularProgress,
+  IconButton,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 
-// プロジェクト固有のインポート
-import { useAuth } from '../../../state/AuthContext';
+import React, { useEffect, useState } from 'react';
+
+import { APP_COLORS } from '../../../../color.config';
 import type { Category } from '../../../../domain/models/Category';
 import { CategoryRepository } from '../../../../infrastructure/repositories/CategoryRepository';
-import { APP_COLORS } from '../../../../color.config';
+import { PrimaryActionButton } from '../../../components/PrimaryActionButton';
+// プロジェクト固有のインポート
+import { useAuth } from '../../../state/AuthContext';
 
 const TOTAL_ROWS = 15;
 
@@ -42,14 +49,15 @@ interface SortableItemProps {
   isDragging: boolean;
 }
 
-const SortableItem: React.FC<SortableItemProps> = ({ id, index, row, onChange, onDelete, isDragging }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id });
+const SortableItem: React.FC<SortableItemProps> = ({
+  id,
+  index,
+  row,
+  onChange,
+  onDelete,
+  isDragging,
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -130,24 +138,30 @@ export const CategoriesSetting: React.FC<{ onBack: () => void }> = ({ onBack }) 
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  useEffect(() => { fetchCategories(); }, [user]);
+  useEffect(() => {
+    fetchCategories();
+  }, [user]);
 
   const fetchCategories = async () => {
     if (!user) return;
     try {
       setLoading(true);
       const data = await CategoryRepository.getCategories(user.id);
-      
-      const fillRows = data.map(c => ({ ...c, tempId: c.id }));
+
+      const fillRows = data.map((c) => ({ ...c, tempId: c.id }));
       while (fillRows.length < TOTAL_ROWS) {
-        fillRows.push({ 
+        fillRows.push({
           tempId: `empty-${Math.random()}`,
-          category_name: '', 
-          is_not_count: false 
+          category_name: '',
+          is_not_count: false,
         } as any);
       }
       setRows(fillRows);
-    } catch (e) { console.error('Fetch error:', e); } finally { setLoading(false); }
+    } catch (e) {
+      console.error('Fetch error:', e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDragStart = (event: DragStartEvent) => setActiveId(event.active.id as string);
@@ -156,8 +170,8 @@ export const CategoriesSetting: React.FC<{ onBack: () => void }> = ({ onBack }) 
     const { active, over } = event;
     if (over && active.id !== over.id) {
       setRows((items) => {
-        const oldIndex = items.findIndex(i => i.tempId === active.id);
-        const newIndex = items.findIndex(i => i.tempId === over.id);
+        const oldIndex = items.findIndex((i) => i.tempId === active.id);
+        const newIndex = items.findIndex((i) => i.tempId === over.id);
         return arrayMove(items, oldIndex, newIndex);
       });
     }
@@ -177,7 +191,7 @@ export const CategoriesSetting: React.FC<{ onBack: () => void }> = ({ onBack }) 
     newRows.push({
       tempId: `empty-${Math.random()}`,
       category_name: '',
-      is_not_count: false
+      is_not_count: false,
     } as any);
     setRows(newRows);
   };
@@ -194,20 +208,19 @@ export const CategoriesSetting: React.FC<{ onBack: () => void }> = ({ onBack }) 
           user_id: user.id,
           category_name: row.category_name?.trim() || '',
           sort_order: index,
-          is_not_count: row.is_not_count || false
+          is_not_count: row.is_not_count || false,
         }))
-        .filter(row => row.category_name !== '');
+        .filter((row) => row.category_name !== '');
 
       // 2. 削除チェック: DBにあるのに今回の保存対象から消えたものを探す
       const initialData = await CategoryRepository.getCategories(user.id);
-      const toSaveIds = new Set(toSave.map(item => item.id).filter(Boolean));
-      const deletedCategories = initialData.filter(item => !toSaveIds.has(item.id));
+      const toSaveIds = new Set(toSave.map((item) => item.id).filter(Boolean));
+      const deletedCategories = initialData.filter((item) => !toSaveIds.has(item.id));
 
       if (deletedCategories.length > 0) {
-        const deletedNames = deletedCategories.map(c => `・${c.category_name}`).join('\n');
-        const confirmMsg = 
-          `以下のカテゴリが削除されます。よろしいですか？\n\n${deletedNames}\n\n※このカテゴリに紐づく過去の支出データは「未分類」扱いになります。`;
-        
+        const deletedNames = deletedCategories.map((c) => `・${c.category_name}`).join('\n');
+        const confirmMsg = `以下のカテゴリが削除されます。よろしいですか？\n\n${deletedNames}\n\n※このカテゴリに紐づく過去の支出データは「未分類」扱いになります。`;
+
         if (!window.confirm(confirmMsg)) {
           setSaving(false);
           return;
@@ -216,45 +229,61 @@ export const CategoriesSetting: React.FC<{ onBack: () => void }> = ({ onBack }) 
 
       // 3. 保存実行（ID維持＋並び替え＋削除の一括処理）
       await CategoryRepository.saveCategoriesOrdered(user.id, toSave);
-      
+
       alert('保存しました');
       fetchCategories();
-    } catch (e) { 
+    } catch (e) {
       console.error('Save error:', e);
-      alert('保存に失敗しました'); 
-    } finally { 
-      setSaving(false); 
+      alert('保存に失敗しました');
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', pt: 10, bgcolor: APP_COLORS.background, height: '100vh' }}>
-      <CircularProgress sx={{ color: APP_COLORS.mainGreen }} />
-    </Box>
-  );
+  if (loading)
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          pt: 10,
+          bgcolor: APP_COLORS.background,
+          height: '100vh',
+        }}
+      >
+        <CircularProgress sx={{ color: APP_COLORS.mainGreen }} />
+      </Box>
+    );
 
   return (
     <Box sx={{ p: 1, bgcolor: APP_COLORS.background, minHeight: '100vh' }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-        <IconButton onClick={onBack} sx={{ color: APP_COLORS.textPrimary }}><ArrowBack /></IconButton>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', color: APP_COLORS.textPrimary }}>カテゴリ設定</Typography>
+        <IconButton onClick={onBack} sx={{ color: APP_COLORS.textPrimary }}>
+          <ArrowBack />
+        </IconButton>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', color: APP_COLORS.textPrimary }}>
+          カテゴリ設定
+        </Typography>
       </Stack>
 
-      <DndContext 
+      <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <Paper elevation={0} sx={{ border: `1px solid ${APP_COLORS.lightGray}`, borderRadius: 4, overflow: 'hidden' }}>
-          <SortableContext items={rows.map(r => r.tempId)} strategy={verticalListSortingStrategy}>
+        <Paper
+          elevation={0}
+          sx={{ border: `1px solid ${APP_COLORS.lightGray}`, borderRadius: 4, overflow: 'hidden' }}
+        >
+          <SortableContext items={rows.map((r) => r.tempId)} strategy={verticalListSortingStrategy}>
             <Stack divider={<Box sx={{ borderBottom: `1px solid ${APP_COLORS.lightGray}` }} />}>
               {rows.map((row, index) => (
-                <SortableItem 
-                  key={row.tempId} 
-                  id={row.tempId} 
-                  index={index} 
-                  row={row} 
+                <SortableItem
+                  key={row.tempId}
+                  id={row.tempId}
+                  index={index}
+                  row={row}
                   onChange={handleChange}
                   onDelete={handleDelete}
                   isDragging={activeId === row.tempId}
@@ -266,23 +295,9 @@ export const CategoriesSetting: React.FC<{ onBack: () => void }> = ({ onBack }) 
       </DndContext>
 
       <Box sx={{ mt: 4, px: 1, pb: 10 }}>
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={handleSave}
-          disabled={saving}
-          sx={{
-            bgcolor: APP_COLORS.mainGreen,
-            height: 56,
-            borderRadius: 4,
-            fontWeight: 'bold',
-            boxShadow: 'none',
-            '&:hover': { bgcolor: APP_COLORS.darkGreen, boxShadow: 'none' },
-            '&:disabled': { bgcolor: APP_COLORS.lightGray }
-          }}
-        >
+        <PrimaryActionButton onClick={handleSave} disabled={saving}>
           {saving ? '保存中...' : '変更を保存する'}
-        </Button>
+        </PrimaryActionButton>
       </Box>
     </Box>
   );

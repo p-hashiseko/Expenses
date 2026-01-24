@@ -1,29 +1,34 @@
-import { useState, forwardRef, useImperativeHandle } from 'react';
-import { 
-  Box, 
-  Typography, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  ListItemIcon, 
-  ListItemButton, 
-  Divider, 
-  Paper 
-} from '@mui/material';
-import { 
-  ChevronRight, 
-  Person, 
-  Category, 
-  Receipt, 
-  Logout 
+import {
+  Category,
+  ChevronRight,
+  Logout,
+  Payments, // 給料用のアイコンを追加
+  Person,
+  Receipt,
 } from '@mui/icons-material';
+import {
+  Box,
+  Divider,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Typography,
+} from '@mui/material';
+
+import { forwardRef, useImperativeHandle, useState } from 'react';
 
 // プロジェクト固有のインポート
 import { APP_COLORS } from '../../../color.config';
 import { useAuth } from '../../state/AuthContext';
-import { CategoriesSetting } from './setting/CategoriesSetting';
 import { AccountInfo } from './setting/AccountInfo';
+import { CategoriesSetting } from './setting/CategoriesSetting';
 import { FixedCostSetting } from './setting/FixedCostSetting';
+import { SalarySetting } from './setting/SlarySetting';
+
+// 今後作成する画面
 
 // 親コンポーネントから呼び出すための型定義
 export interface SettingsTabHandle {
@@ -33,10 +38,10 @@ export interface SettingsTabHandle {
 export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
   const { signOut } = useAuth();
 
-  // 表示する画面を管理するステート（'fixed' を追加）
-  const [currentView, setCurrentView] = useState<'menu' | 'categories' | 'account' | 'fixed'>(
-    'menu'
-  );
+  // 表示する画面を管理するステート（'salary' を追加）
+  const [currentView, setCurrentView] = useState<
+    'menu' | 'categories' | 'account' | 'fixed' | 'salary'
+  >('menu');
 
   // 親コンポーネント（DashboardPage等）からアクセス可能にする関数
   useImperativeHandle(ref, () => ({
@@ -66,6 +71,10 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
 
   if (currentView === 'fixed') {
     return <FixedCostSetting onBack={() => setCurrentView('menu')} />;
+  }
+
+  if (currentView === 'salary') {
+    return <SalarySetting onBack={() => setCurrentView('menu')} />;
   }
 
   // --- メインメニュー (currentView === 'menu') ---
@@ -141,6 +150,22 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
 
           <Divider sx={{ borderColor: APP_COLORS.lightGray }} />
 
+          {/* 給料の設定 */}
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => setCurrentView('salary')}>
+              <ListItemIcon sx={{ color: APP_COLORS.mainGreen }}>
+                <Payments />
+              </ListItemIcon>
+              <ListItemText
+                primary="給料の設定"
+                primaryTypographyProps={{ fontWeight: '600', color: APP_COLORS.textPrimary }}
+              />
+              <ChevronRight sx={{ color: APP_COLORS.lightGray }} />
+            </ListItemButton>
+          </ListItem>
+
+          <Divider sx={{ borderColor: APP_COLORS.lightGray }} />
+
           {/* ログアウト */}
           <ListItem disablePadding>
             <ListItemButton
@@ -169,5 +194,4 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
   );
 });
 
-// 表示名をデバッグ用に設定
 SettingsTab.displayName = 'SettingsTab';

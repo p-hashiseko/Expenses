@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Stack, CircularProgress } from '@mui/material';
 import { CalendarToday } from '@mui/icons-material';
+import { Box, CircularProgress, Paper, Stack, Typography } from '@mui/material';
+
+import React, { useEffect, useState } from 'react';
 
 // 共通設定・コンポーネント
 import { APP_COLORS } from '../../../color.config';
+import type { Category } from '../../../domain/models/Category';
+// リポジトリ・モデル
+import { CategoryRepository } from '../../../infrastructure/repositories/CategoryRepository';
+import { ExpensesRepository } from '../../../infrastructure/repositories/ExpensesRepository';
 import { CategoryInputField } from '../../components/CategoryInputField';
 import { PrimaryActionButton } from '../../components/PrimaryActionButton';
 import { useAuth } from '../../state/AuthContext';
 
-// リポジトリ・モデル
-import { CategoryRepository } from '../../../infrastructure/repositories/CategoryRepository';
-import type { Category } from '../../../domain/models/Category';
-import { ExpensesRepository } from '../../../infrastructure/repositories/ExpensesRepository';
-
-export const RegistrationTab: React.FC = () => {
+export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false }) => {
   const { user } = useAuth();
 
   // --- State ---
@@ -22,6 +22,10 @@ export const RegistrationTab: React.FC = () => {
   const [currentInputs, setCurrentInputs] = useState<{ [key: string]: string }>({});
   const [displayTotalMap, setDisplayTotalMap] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState(true);
+  const [savingLocal, setSavingLocal] = useState(false);
+
+  // 外部からの saving もしくは ローカルの savingLocal のいずれかが true なら保存中とみなす
+  const isSaving = saving || savingLocal;
 
   const today = new Date();
   const dateString = `${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`;
@@ -35,10 +39,9 @@ export const RegistrationTab: React.FC = () => {
 
       try {
         setLoading(true);
-        // 並列でデータ取得（どちらかが失敗しても片方は反映する）
         const results = await Promise.allSettled([
           CategoryRepository.getCategories(user.id),
-          ExpensesRepository.getTodayTotals(user.id)
+          ExpensesRepository.getTodayTotals(user.id),
         ]);
 
         const catRes = results[0];
@@ -49,18 +52,13 @@ export const RegistrationTab: React.FC = () => {
 
         if (catRes.status === 'fulfilled') {
           categoryList = catRes.value as Category[];
-        } else {
-          console.error('カテゴリ取得に失敗しました:', catRes.reason);
         }
 
         if (totalsRes.status === 'fulfilled') {
           todayTotals = totalsRes.value as { [key: string]: number };
-        } else {
-          console.error('本日の合計取得に失敗しました:', totalsRes.reason);
         }
 
         if (isMounted) {
-          // 取得に成功した方だけステートを更新
           setCategories(categoryList);
           setBaseAmountMap(todayTotals || {});
           setDisplayTotalMap(todayTotals || {});
@@ -75,7 +73,9 @@ export const RegistrationTab: React.FC = () => {
     };
 
     fetchInitialData();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   // --- イベントハンドラ ---
@@ -90,7 +90,7 @@ export const RegistrationTab: React.FC = () => {
 
     setDisplayTotalMap((prev) => ({
       ...prev,
-      [id]: baseValue + inputValue
+      [id]: baseValue + inputValue,
     }));
   };
 
@@ -111,25 +111,22 @@ export const RegistrationTab: React.FC = () => {
     }
 
     try {
-      setLoading(true);
+      setSavingLocal(true); // 保存開始
       await ExpensesRepository.saveExpenses(transactionsToSave);
-      
-      // 保存後の再取得
+
       const updatedTotals = await ExpensesRepository.getTodayTotals(user.id);
       setBaseAmountMap(updatedTotals);
       setDisplayTotalMap(updatedTotals);
-      setCurrentInputs({}); 
+      setCurrentInputs({});
 
       alert('記録しました！');
     } catch (error) {
       console.error('保存エラー:', error);
       alert('保存に失敗しました');
     } finally {
-      setLoading(false);
+      setSavingLocal(false); // 保存終了
     }
   };
-
-  // --- 描画ロジック ---
 
   if (loading) {
     return (
@@ -141,23 +138,38 @@ export const RegistrationTab: React.FC = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, p: 2, bgcolor: APP_COLORS.white, borderRadius: 2, boxShadow: `0 2px 8px ${APP_COLORS.lightGray}` }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          mb: 3,
+          p: 2,
+          bgcolor: APP_COLORS.white,
+          borderRadius: 2,
+          boxShadow: `0 2px 8px ${APP_COLORS.lightGray}`,
+        }}
+      >
         <CalendarToday sx={{ color: APP_COLORS.mainGreen, mr: 1, fontSize: 20 }} />
         <Typography sx={{ fontWeight: 'bold', color: APP_COLORS.textPrimary }}>
           今日の支出を入力: {dateString}
         </Typography>
       </Box>
 
-      <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: `1px solid ${APP_COLORS.lightGray}`, bgcolor: 'white' }}>
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          borderRadius: 3,
+          border: `1px solid ${APP_COLORS.lightGray}`,
+          bgcolor: 'white',
+        }}
+      >
         <Stack spacing={0}>
-          {/* デバッグ情報（正常に表示されたら削除してください） */}
           {categories.length === 0 && (
-             <Typography sx={{ p: 2, textAlign: 'center', color: APP_COLORS.textPrimary }}>
-               データは取得されましたが表示対象がありません
-             </Typography>
+            <Typography sx={{ p: 2, textAlign: 'center', color: APP_COLORS.textPrimary }}>
+              データは取得されましたが表示対象がありません
+            </Typography>
           )}
-
-          {/* デバッグ出力は削除済み */}
 
           {categories.map((cat) => (
             <CategoryInputField
@@ -173,8 +185,9 @@ export const RegistrationTab: React.FC = () => {
       </Paper>
 
       <Box sx={{ mt: 4 }}>
-        <PrimaryActionButton onClick={handleSave} disabled={loading}>
-          記録する
+        {/* isSaving に基づいてボタンの状態とテキストを切り替え */}
+        <PrimaryActionButton onClick={handleSave} disabled={isSaving}>
+          {isSaving ? '記録中...' : '今日の支出を記録する'}
         </PrimaryActionButton>
       </Box>
     </Box>
