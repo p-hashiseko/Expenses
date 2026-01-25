@@ -1,4 +1,4 @@
-import { Create, Flag, PieChart, Settings } from '@mui/icons-material';
+import { Assessment, Create, PieChart, Settings } from '@mui/icons-material';
 import { BottomNavigation, BottomNavigationAction, Box, Container, Paper } from '@mui/material';
 
 import React, { useRef, useState } from 'react';
@@ -6,43 +6,45 @@ import React, { useRef, useState } from 'react';
 import { APP_COLORS } from '../../color.config';
 import { Header } from '../components/Header';
 import { AnalysisTab } from './dashboard/AnalysisTab';
-import { ConfigTab } from './dashboard/ConfigTab';
 import { RegistrationTab } from './dashboard/RegistrationTab';
-// SettingsTabHandle を追加でインポート
 import { SettingsTab, type SettingsTabHandle } from './dashboard/SettingsTab';
+import { WeeklySummaryTable } from './dashboard/WeeklySummaryTable';
 
-type TabType = 'registration' | 'analytics' | 'config' | 'setting';
+export type TabType = 'registration' | 'summary' | 'analytics' | 'setting';
 
 export const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('registration');
-
-  // SettingsTab のメソッドを呼ぶための Ref を作成
+  const [targetDate, setTargetDate] = useState<Date>(new Date());
   const settingsTabRef = useRef<SettingsTabHandle>(null);
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'registration':
+        return <RegistrationTab initialDate={targetDate} />;
+      case 'summary':
+        return <WeeklySummaryTable />;
       case 'analytics':
         return <AnalysisTab />;
-      case 'registration':
-        return <RegistrationTab />;
-      case 'config':
-        return <ConfigTab />;
-      // ref を渡すように変更
       case 'setting':
         return <SettingsTab ref={settingsTabRef} />;
       default:
-        return <RegistrationTab />;
+        return <RegistrationTab initialDate={targetDate} />;
     }
   };
 
-  // タブ変更時の処理
   const handleTabChange = (_event: React.SyntheticEvent, newValue: TabType) => {
-    // すでに設定タブにいる状態で「設定」が押された場合、表示をリセット
     if (activeTab === 'setting' && newValue === 'setting') {
       settingsTabRef.current?.resetView();
     }
+    if (newValue === 'registration') {
+      setTargetDate(new Date());
+    }
     setActiveTab(newValue);
   };
+
+  // 表示幅の判定ロジック
+  // summary（閲覧）と analytics（分析）の時は横幅を広げる（md）
+  const containerMaxWidth = activeTab === 'summary' || activeTab === 'analytics' ? 'md' : 'sm';
 
   return (
     <Box
@@ -54,19 +56,18 @@ export const DashboardPage: React.FC = () => {
       }}
     >
       <Header />
-
       <Container
-        maxWidth="sm"
+        maxWidth={containerMaxWidth}
         sx={{
           flex: 1,
           py: 3,
-          pb: 10,
+          pb: 12,
           color: APP_COLORS.textPrimary,
+          transition: 'max-width 0.3s ease',
         }}
       >
         {renderContent()}
       </Container>
-
       <Paper
         sx={{
           position: 'fixed',
@@ -81,15 +82,10 @@ export const DashboardPage: React.FC = () => {
         <BottomNavigation
           showLabels
           value={activeTab}
-          onChange={handleTabChange} // ハンドラを外部定義のものに変更
+          onChange={handleTabChange}
           sx={{
             height: 70,
-            '& .MuiBottomNavigationAction-root': {
-              color: APP_COLORS.textPrimary,
-              opacity: 0.6,
-            },
             '& .Mui-selected': {
-              opacity: 1,
               '& .MuiBottomNavigationAction-label, & .MuiSvgIcon-root': {
                 color: `${APP_COLORS.mainGreen} !important`,
                 fontWeight: 'bold',
@@ -98,8 +94,8 @@ export const DashboardPage: React.FC = () => {
           }}
         >
           <BottomNavigationAction label="入力" value="registration" icon={<Create />} />
+          <BottomNavigationAction label="閲覧" value="summary" icon={<Assessment />} />
           <BottomNavigationAction label="分析" value="analytics" icon={<PieChart />} />
-          <BottomNavigationAction label="目標" value="config" icon={<Flag />} />
           <BottomNavigationAction label="設定" value="setting" icon={<Settings />} />
         </BottomNavigation>
       </Paper>

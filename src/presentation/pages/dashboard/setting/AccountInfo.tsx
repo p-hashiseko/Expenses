@@ -1,26 +1,47 @@
-import React from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  TextField, 
-  IconButton, 
-  Stack, 
+import { ArrowBack, Email, Lock, Person } from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
   InputAdornment,
-  Button
+  Paper,
+  Stack,
+  TextField,
+  Typography,
 } from '@mui/material';
-import { 
-  ArrowBack, 
-  Person, 
-  Email, 
-  Lock 
-} from '@mui/icons-material';
 
-import { useAuth } from '../../../state/AuthContext';
+import React, { useEffect, useState } from 'react';
+
 import { APP_COLORS } from '../../../../color.config';
+import { ProfileRepository } from '../../../../infrastructure/repositories/ProfileRepository';
+import { useAuth } from '../../../state/AuthContext';
 
 export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const { user } = useAuth();
+  const [username, setUsername] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user?.id) return;
+      try {
+        setLoading(true);
+        const profile = await ProfileRepository.getProfile(user.id);
+        if (profile?.username) {
+          setUsername(profile.username);
+        }
+      } catch (error) {
+        console.error('プロファイル取得失敗:', error);
+        // エラー時はフォールバックとしてメールアドレスの@前を表示
+        setUsername(user.email?.split('@')[0] || 'ユーザー名未設定');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
 
   return (
     <Box sx={{ p: 1, bgcolor: APP_COLORS.background, minHeight: '100vh' }}>
@@ -35,7 +56,7 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       </Stack>
 
       <Stack spacing={2}>
-        {/* ユーザー名（メールの@より前を仮表示） */}
+        {/* ユーザー名 */}
         <Paper
           elevation={0}
           sx={{
@@ -51,21 +72,27 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           >
             ユーザー名
           </Typography>
-          <TextField
-            fullWidth
-            variant="standard"
-            value={user?.email?.split('@')[0] || 'ユーザー名未設定'}
-            InputProps={{
-              readOnly: true,
-              disableUnderline: true,
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Person sx={{ color: APP_COLORS.mainGreen }} />
-                </InputAdornment>
-              ),
-              sx: { fontWeight: '600', color: APP_COLORS.textPrimary },
-            }}
-          />
+          {loading ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', height: '32px' }}>
+              <CircularProgress size={20} sx={{ color: APP_COLORS.mainGreen }} />
+            </Box>
+          ) : (
+            <TextField
+              fullWidth
+              variant="standard"
+              value={username}
+              InputProps={{
+                readOnly: true,
+                disableUnderline: true,
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Person sx={{ color: APP_COLORS.mainGreen }} />
+                  </InputAdornment>
+                ),
+                sx: { fontWeight: '600', color: APP_COLORS.textPrimary },
+              }}
+            />
+          )}
         </Paper>
 
         {/* メールアドレス */}

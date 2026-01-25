@@ -17,7 +17,7 @@ import React from 'react';
 import { APP_COLORS } from '../../color.config';
 import type { Category } from '../../domain/models/Category';
 import type { FixedCostsConfigFront } from '../../domain/models/FixedCostsConfig';
-import { formatCurrency, sanitizeNumericInput } from '../../uitls/formatters';
+import { formatCurrency, sanitizeNumericInput } from '../../utils/formatters';
 // 修正
 import { SecondaryAddButton } from './SecondaryAddButton';
 

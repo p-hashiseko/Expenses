@@ -11,6 +11,9 @@ export const APP_COLORS = {
   // 暗い緑（ハイライトカラー・ホバー時など）
   darkGreen: '#2e9d6d',
 
+  // ハイライト用の非常に薄い緑（カード背景など）
+  highlightGreen: '#3ecf8e14', // 80%ではなく14(16進数)で約8%の透明度
+
   // 薄めのグレー（影色・ボーダー・無効色）
   lightGray: '#E5E7EB',
 
@@ -18,4 +21,4 @@ export const APP_COLORS = {
   background: '#f5f5f5',
   white: '#ffffff',
   error: '#ef4444',
-} as const; // 読み取り専用にする
+} as const;

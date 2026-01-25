@@ -16,11 +16,12 @@ import { CategoryInputField } from '../../components/CategoryInputField';
 import { PrimaryActionButton } from '../../components/PrimaryActionButton';
 import { useAuth } from '../../state/AuthContext';
 
-export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false }) => {
+export const RegistrationTab: React.FC<{ initialDate?: Date; saving?: boolean }> = ({
+  initialDate,
+  saving = false,
+}) => {
   const { user } = useAuth();
-
-  // 1. 状態管理
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(initialDate || new Date());
   const [categories, setCategories] = useState<Category[]>([]);
   const [baseAmountMap, setBaseAmountMap] = useState<{ [key: string]: number }>({});
   const [amountInputs, setAmountInputs] = useState<{ [key: string]: string }>({});
@@ -28,13 +29,16 @@ export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false
   const [displayTotalMap, setDisplayTotalMap] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState(true);
   const [savingLocal, setSavingLocal] = useState(false);
-
-  // カレンダーの開閉状態
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const isSaving = saving || savingLocal;
 
-  // 2. 日付操作
+  useEffect(() => {
+    if (initialDate) {
+      setSelectedDate(initialDate);
+    }
+  }, [initialDate]);
+
   const handlePrevDay = () => {
     if (selectedDate) setSelectedDate(subDays(selectedDate, 1));
   };
@@ -43,7 +47,6 @@ export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false
     if (selectedDate) setSelectedDate(addDays(selectedDate, 1));
   };
 
-  // 3. データ取得
   useEffect(() => {
     let isMounted = true;
     const fetchData = async () => {
@@ -75,10 +78,8 @@ export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false
     };
   }, [user, selectedDate]);
 
-  // 4. 保存処理
   const handleSave = async () => {
     if (!user || !selectedDate) return;
-
     const isoDate = format(selectedDate, 'yyyy-MM-dd');
     const transactionsToSave: Expense[] = Object.entries(amountInputs)
       .filter(([_, value]) => value !== '' && parseInt(value, 10) > 0)
@@ -122,22 +123,12 @@ export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ja}>
       <Box>
-        {/* 日付選択ヘッダー */}
         <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mb: 3,
-            gap: 1, // 要素間の隙間を調整
-          }}
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 3, gap: 1 }}
         >
-          {/* 左矢印ボタン */}
           <IconButton onClick={handlePrevDay} sx={{ color: APP_COLORS.mainGreen }}>
             <ChevronLeft />
           </IconButton>
-
-          {/* インプット形式の日付選択エリア */}
           <DatePicker
             open={isCalendarOpen}
             onOpen={() => setIsCalendarOpen(true)}
@@ -145,12 +136,11 @@ export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false
             value={selectedDate}
             onChange={(newValue) => setSelectedDate(newValue)}
             format="yyyy/MM/dd"
-            // デフォルトのアイコンボタンを非表示にし、自作のAdornmentを使う
             slots={{ openPickerIcon: () => null }}
             slotProps={{
               textField: {
                 onClick: () => setIsCalendarOpen(true),
-                variant: 'outlined', // 枠線のあるインプット形式
+                variant: 'outlined',
                 size: 'small',
                 InputProps: {
                   readOnly: true,
@@ -163,16 +153,12 @@ export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false
                   ),
                   sx: {
                     cursor: 'pointer',
-                    borderRadius: '12px', // 角を丸く
+                    borderRadius: '12px',
                     bgcolor: 'white',
                     fontWeight: 'bold',
-                    width: '180px', // アイコンを含めた幅を確保
-                    '& fieldset': {
-                      borderColor: APP_COLORS.lightGray, // 枠線の色
-                    },
-                    '&:hover fieldset': {
-                      borderColor: APP_COLORS.mainGreen, // ホバー時の色
-                    },
+                    width: '180px',
+                    '& fieldset': { borderColor: APP_COLORS.lightGray },
+                    '&:hover fieldset': { borderColor: APP_COLORS.mainGreen },
                   },
                 },
                 sx: {
@@ -185,8 +171,6 @@ export const RegistrationTab: React.FC<{ saving?: boolean }> = ({ saving = false
               },
             }}
           />
-
-          {/* 右矢印ボタン */}
           <IconButton onClick={handleNextDay} sx={{ color: APP_COLORS.mainGreen }}>
             <ChevronRight />
           </IconButton>

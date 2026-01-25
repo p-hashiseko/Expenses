@@ -1,1 +1,0 @@
-export const ConfigTab = () => <div>目標・固定費設定画面</div>;

@@ -3,7 +3,7 @@ import { Box, InputAdornment, InputBase, TextField, Typography } from '@mui/mate
 import React from 'react';
 
 import { APP_COLORS } from '../../color.config';
-import { formatCurrency, sanitizeNumericInput } from '../../uitls/formatters';
+import { formatCurrency, sanitizeNumericInput } from '../../utils/formatters';
 
 interface CategoryInputFieldProps {
   label: string;

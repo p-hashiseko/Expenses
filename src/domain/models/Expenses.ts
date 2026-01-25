@@ -5,4 +5,5 @@ export interface Expense {
   amount: number;
   memo: string | null;
   paymentDate: string;
+  createdAt?: string;
 }
