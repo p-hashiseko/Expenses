@@ -1,5 +1,11 @@
 import { Assessment, Create, PieChart, Settings } from '@mui/icons-material';
-import { BottomNavigation, BottomNavigationAction, Box, Container, Paper } from '@mui/material';
+import {
+  BottomNavigation,
+  BottomNavigationAction,
+  Box,
+  Container,
+  Paper,
+} from '@mui/material';
 
 import React, { useRef, useState } from 'react';
 
@@ -14,13 +20,12 @@ export type TabType = 'registration' | 'summary' | 'analytics' | 'setting';
 
 export const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('registration');
-  const [targetDate, setTargetDate] = useState<Date>(new Date());
   const settingsTabRef = useRef<SettingsTabHandle>(null);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'registration':
-        return <RegistrationTab initialDate={targetDate} />;
+        return <RegistrationTab />;
       case 'summary':
         return <WeeklySummaryTable />;
       case 'analytics':
@@ -28,7 +33,7 @@ export const DashboardPage: React.FC = () => {
       case 'setting':
         return <SettingsTab ref={settingsTabRef} />;
       default:
-        return <RegistrationTab initialDate={targetDate} />;
+        return <RegistrationTab />;
     }
   };
 
@@ -37,14 +42,18 @@ export const DashboardPage: React.FC = () => {
       settingsTabRef.current?.resetView();
     }
     if (newValue === 'registration') {
-      setTargetDate(new Date());
     }
     setActiveTab(newValue);
   };
 
-  // 表示幅の判定ロジック
-  // summary（閲覧）と analytics（分析）の時は横幅を広げる（md）
-  const containerMaxWidth = activeTab === 'summary' || activeTab === 'analytics' ? 'md' : 'sm';
+  // 表示幅の判定ロジックを修正
+  // registration（入力）以外は横幅を広げる（md）設定にします
+  const containerMaxWidth =
+    activeTab === 'summary' ||
+    activeTab === 'analytics' ||
+    activeTab === 'setting'
+      ? 'md'
+      : 'sm';
 
   return (
     <Box
@@ -93,10 +102,26 @@ export const DashboardPage: React.FC = () => {
             },
           }}
         >
-          <BottomNavigationAction label="入力" value="registration" icon={<Create />} />
-          <BottomNavigationAction label="閲覧" value="summary" icon={<Assessment />} />
-          <BottomNavigationAction label="分析" value="analytics" icon={<PieChart />} />
-          <BottomNavigationAction label="設定" value="setting" icon={<Settings />} />
+          <BottomNavigationAction
+            label="入力"
+            value="registration"
+            icon={<Create />}
+          />
+          <BottomNavigationAction
+            label="閲覧"
+            value="summary"
+            icon={<Assessment />}
+          />
+          <BottomNavigationAction
+            label="分析"
+            value="analytics"
+            icon={<PieChart />}
+          />
+          <BottomNavigationAction
+            label="設定"
+            value="setting"
+            icon={<Settings />}
+          />
         </BottomNavigation>
       </Paper>
     </Box>

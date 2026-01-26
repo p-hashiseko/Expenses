@@ -15,7 +15,7 @@ import {
 import React from 'react';
 
 import { APP_COLORS } from '../../color.config';
-import type { Category } from '../../domain/models/Category';
+import type { Category } from '../../domain/const/Category';
 import type { FixedCostsConfigFront } from '../../domain/models/FixedCostsConfig';
 import { formatCurrency, sanitizeNumericInput } from '../../utils/formatters';
 // 修正
@@ -28,7 +28,11 @@ export type RecurringItemRowProps = {
   item: FixedCostsConfigFront; // 修正
   index: number;
   categories: Category[];
-  onUpdate: (index: number, key: keyof FixedCostsConfigFront, value: any) => void; // 修正
+  onUpdate: (
+    index: number,
+    key: keyof FixedCostsConfigFront,
+    value: any,
+  ) => void; // 修正
   onRemove: (index: number) => void;
   amountDisabled?: boolean;
 };
@@ -58,7 +62,11 @@ export const RecurringItemRow: React.FC<RecurringItemRowProps> = ({
           value={item.paymentDate} // day -> paymentDate
           // 数字以外の入力を防ぐため sanitizeNumericInput を適用しつつ数値化
           onChange={(e) =>
-            onUpdate(index, 'paymentDate', Number(sanitizeNumericInput(e.target.value)))
+            onUpdate(
+              index,
+              'paymentDate',
+              Number(sanitizeNumericInput(e.target.value)),
+            )
           }
           sx={{ width: 140 }}
           InputProps={{
@@ -108,7 +116,10 @@ export const RecurringItemRow: React.FC<RecurringItemRowProps> = ({
               justifyContent: 'center',
             }}
           >
-            <Typography variant="caption" sx={{ color: APP_COLORS.textPrimary, opacity: 0.6 }}>
+            <Typography
+              variant="caption"
+              sx={{ color: APP_COLORS.textPrimary, opacity: 0.6 }}
+            >
               金額は都度入力
             </Typography>
           </Box>
@@ -119,13 +130,20 @@ export const RecurringItemRow: React.FC<RecurringItemRowProps> = ({
             value={formatCurrency(item.amount ?? 0)} // formatNumber -> formatCurrency
             // 全角・カンマ・マイナスを除去して数値に戻す
             onChange={(e) =>
-              onUpdate(index, 'amount', Number(sanitizeNumericInput(e.target.value)))
+              onUpdate(
+                index,
+                'amount',
+                Number(sanitizeNumericInput(e.target.value)),
+              )
             }
             sx={{ flex: 1.5, '& .MuiInputBase-input': { textAlign: 'right' } }}
             InputProps={{
               inputMode: 'numeric',
               endAdornment: (
-                <Typography variant="body2" sx={{ ml: 0.5, color: APP_COLORS.textPrimary }}>
+                <Typography
+                  variant="body2"
+                  sx={{ ml: 0.5, color: APP_COLORS.textPrimary }}
+                >
                   円
                 </Typography>
               ),
@@ -133,7 +151,10 @@ export const RecurringItemRow: React.FC<RecurringItemRowProps> = ({
           />
         )}
 
-        <IconButton onClick={() => onRemove(index)} sx={{ color: APP_COLORS.error }}>
+        <IconButton
+          onClick={() => onRemove(index)}
+          sx={{ color: APP_COLORS.error }}
+        >
           <Delete />
         </IconButton>
       </Stack>
@@ -148,7 +169,11 @@ type RecurringSectionProps = {
   icon: React.ReactNode;
   items: FixedCostsConfigFront[]; // 修正
   categories: Category[];
-  onUpdate: (index: number, key: keyof FixedCostsConfigFront, value: any) => void; // 修正
+  onUpdate: (
+    index: number,
+    key: keyof FixedCostsConfigFront,
+    value: any,
+  ) => void; // 修正
   onRemove: (index: number) => void;
   onAdd: (isFixed: boolean) => void;
   saving?: boolean;
@@ -167,14 +192,17 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({
 }) => {
   // 表示対象だけをフィルタリング（固定費なら amount が null 以外）
   const displayItems = items.filter((item) =>
-    isFixed ? item.amount !== null : item.amount === null
+    isFixed ? item.amount !== null : item.amount === null,
   );
 
   return (
     <Box sx={{ mb: 4 }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
         {icon}
-        <Typography variant="h6" sx={{ fontWeight: 'bold', color: APP_COLORS.textPrimary }}>
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: 'bold', color: APP_COLORS.textPrimary }}
+        >
           {title}
         </Typography>
       </Stack>
@@ -197,7 +225,11 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({
           );
         })}
 
-        <SecondaryAddButton onClick={() => onAdd(isFixed)} disabled={saving} startIcon={<Add />}>
+        <SecondaryAddButton
+          onClick={() => onAdd(isFixed)}
+          disabled={saving}
+          startIcon={<Add />}
+        >
           {title}を追加
         </SecondaryAddButton>
       </Stack>
