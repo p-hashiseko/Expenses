@@ -1,9 +1,15 @@
-export interface Expense {
-  id?: string;
+export interface ExpenseInput {
   userId: string;
-  categoryId: string;
+  category: string;
   amount: number;
   memo: string | null;
-  paymentDate: string;
-  createdAt?: string;
+  payment_date: string;
+}
+
+export interface ExpenseOutput {
+  userId: string;
+  category: string;
+  amount: number;
+  memo: string | null;
+  payment_date: string;
 }

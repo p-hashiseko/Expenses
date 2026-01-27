@@ -9,7 +9,7 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { CATEGORY, type Category } from '../../../../../domain/const/Category';
 import type { CategoryConfigInput } from '../../../../../domain/models/CategoryConfig';
-import { CategoryconfigRepository } from '../../../../../infrastructure/repositories/CategoryConfigRepository';
+import { CategoryConfigRepository } from '../../../../../infrastructure/repositories/CategoryConfigRepository';
 import { useAuth } from '../../../../state/AuthContext';
 import { CategorySettingPresenter } from './CategorySettingPresenter';
 
@@ -36,7 +36,7 @@ export const CategorySettingContainer: React.FC<{ onBack: () => void }> = ({
     if (!user) return;
     try {
       setLoading(true);
-      const data = await CategoryconfigRepository.getCategoryConfig(user.id);
+      const data = await CategoryConfigRepository.getCategoryConfig(user.id);
 
       if (data && data.length > 0) {
         const sortedInits = data
@@ -89,7 +89,7 @@ export const CategorySettingContainer: React.FC<{ onBack: () => void }> = ({
     try {
       setSaving(true);
       // 既存データを一旦削除（Repository側の実装に合わせて調整）
-      await CategoryconfigRepository.deleteCategoryConfig(user.id);
+      await CategoryConfigRepository.deleteCategoryConfig(user.id);
 
       if (selectedCategories.length > 0) {
         const payload: CategoryConfigInput[] = selectedCategories.map(
@@ -98,7 +98,7 @@ export const CategorySettingContainer: React.FC<{ onBack: () => void }> = ({
             sort: index,
           }),
         );
-        await CategoryconfigRepository.saveCategoryConfig(user.id, payload);
+        await CategoryConfigRepository.saveCategoryConfig(user.id, payload);
       }
 
       alert('カテゴリ設定を保存しました');

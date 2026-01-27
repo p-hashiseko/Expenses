@@ -1,9 +1,19 @@
-export interface FixedCostsConfigFront {
-  tempId: string; // クライアント側での一意識別用
-  id?: string; // DBのUUID
+import type { Category } from '../const/Category';
+
+export interface FixedCostsConfigInput {
   userId: string;
-  categoryId: string;
   memo: string;
-  amount: number | null; // 固定費は数値、変動費はnull
-  paymentDate: number; // 支給日・支払日（1〜31）
+  category: Category;
+  amount: number | null;
+  paymentDate: number;
+  sort: number;
+}
+
+export interface FixedCostsConfigOutput {
+  userId: string;
+  memo: string;
+  category: Category;
+  amount: number | null;
+  paymentDate: number;
+  sort: number;
 }

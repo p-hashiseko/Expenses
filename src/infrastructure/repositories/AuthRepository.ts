@@ -1,11 +1,14 @@
-import type { User } from '../../domain/models/User';
+import type { Profile } from '../../domain/models/Profile';
 import { supabase } from '../supabase/client';
 
 export const AuthRepository = {
   // --- 既存の signInWithUsername はそのまま ---
-  async signInWithUsername(username: string, password: string): Promise<User> {
+  async signInWithUsername(
+    username: string,
+    password: string,
+  ): Promise<Profile> {
     const { data: userData, error: userError } = await supabase
-      .from('profiles') 
+      .from('profiles')
       .select('email')
       .eq('username', username)
       .single();
@@ -28,5 +31,5 @@ export const AuthRepository = {
   async signOut(): Promise<void> {
     const { error } = await supabase.auth.signOut();
     if (error) throw new Error(error.message);
-  }
+  },
 };

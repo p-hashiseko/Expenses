@@ -1,107 +1,80 @@
-import type { Expense } from '../../domain/models/Expenses';
+import type { ExpenseInput, ExpenseOutput } from '../../domain/models/Expenses';
 import { supabase } from '../supabase/client';
 
 export const ExpensesRepository = {
   /**
-   * 今日のカテゴリごとの合計支出を取得する
+   * 取得: 特定ユーザーの支出一覧を取得
    */
-  async getTodayTotals(userId: string, date?: string): Promise<{ [key: string]: number }> {
-    const targetDate = date || new Date().toISOString().split('T')[0];
-
+  async getExpenses(userId: string): Promise<ExpenseOutput[]> {
     const { data, error } = await supabase
       .from('expenses')
-      .select('category_id, amount')
+      .select('*')
       .eq('user_id', userId)
-      .eq('payment_date', targetDate);
+      .order('payment_date', { ascending: false });
 
     if (error) throw error;
 
-    const totals: { [key: string]: number } = {};
-    (data as any[]).forEach((row) => {
-      totals[row.category_id] = (totals[row.category_id] || 0) + row.amount;
-    });
-
-    return totals;
+    return (data as any[]).map((row) => ({
+      userId: row.user_id,
+      category: row.category,
+      amount: row.amount,
+      memo: row.memo,
+      payment_date: row.payment_date,
+    }));
   },
 
   /**
-   * 指定された期間の支出データをすべて取得する
+   * 保存 (新規作成): 単一の支出レコードを挿入
    */
-  async getExpensesByRange(userId: string, startDate: string, endDate: string): Promise<Expense[]> {
+  async saveExpense(expense: ExpenseInput): Promise<void> {
+    const { error } = await supabase.from('expenses').insert({
+      user_id: expense.userId,
+      category: expense.category,
+      amount: expense.amount,
+      memo: expense.memo,
+      payment_date: expense.payment_date,
+    });
+
+    if (error) throw error;
+  },
+
+  /**
+   * 削除: 特定ユーザーの全支出データを削除
+   * (特定の1件を消す場合は引数にidを追加するなどの調整が可能です)
+   */
+  async deleteAllExpenses(userId: string): Promise<void> {
+    const { error } = await supabase
+      .from('expenses')
+      .delete()
+      .eq('user_id', userId);
+
+    if (error) throw error;
+  },
+
+  /**
+   * 指定した期間の支出データを取得
+   */
+  async getExpensesByPeriod(
+    userId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<ExpenseOutput[]> {
     const { data, error } = await supabase
       .from('expenses')
       .select('*')
       .eq('user_id', userId)
       .gte('payment_date', startDate)
       .lte('payment_date', endDate)
-      .order('created_at', { ascending: true });
+      .order('payment_date', { ascending: true });
 
-    if (error) {
-      console.error('Supabase Select Error (Range):', error);
-      throw error;
-    }
+    if (error) throw error;
 
     return (data as any[]).map((row) => ({
-      id: row.id,
       userId: row.user_id,
-      categoryId: row.category_id,
+      category: row.category,
       amount: row.amount,
       memo: row.memo,
-      paymentDate: row.payment_date,
-      createdAt: row.created_at,
+      payment_date: row.payment_date,
     }));
-  },
-
-  /**
-   * 支出を保存する
-   */
-  async saveExpenses(expenses: Expense[]): Promise<void> {
-    const toInsert = expenses.map((e) => ({
-      user_id: e.userId,
-      category_id: e.categoryId,
-      amount: e.amount,
-      memo: e.memo,
-      payment_date: e.paymentDate,
-    }));
-
-    const { error } = await supabase.from('expenses').insert(toInsert);
-
-    if (error) {
-      console.error('Supabase Insert Error:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * 支出データの更新
-   * @param id 更新対象の支出ID
-   * @param data 更新内容（メモと金額）
-   */
-  async updateExpense(id: string, data: { memo: string; amount: number }): Promise<void> {
-    const { error } = await supabase
-      .from('expenses')
-      .update({
-        memo: data.memo,
-        amount: data.amount,
-        updated_at: new Date().toISOString(), // 記入時間はupdated_atで管理
-      })
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error updating expense:', error);
-      throw new Error('データの更新に失敗しました');
-    }
-  },
-
-  /**
-   * 支出データの削除（必要に応じて追加してください）
-   */
-  async deleteExpense(id: string): Promise<void> {
-    const { error } = await supabase.from('expenses').delete().eq('id', id);
-
-    if (error) {
-      console.error('Error deleting expense:', error);
-      throw new Error('データの削除に失敗しました');
-    }
   },
 };

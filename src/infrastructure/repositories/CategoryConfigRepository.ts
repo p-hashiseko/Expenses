@@ -4,7 +4,7 @@ import type {
 } from '../../domain/models/CategoryConfig';
 import { supabase } from '../supabase/client';
 
-export const CategoryconfigRepository = {
+export const CategoryConfigRepository = {
   // カテゴリを取得
   async getCategoryConfig(userId: string): Promise<CategoryConfigOutput[]> {
     const { data, error } = await supabase

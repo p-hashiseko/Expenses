@@ -10,39 +10,24 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import React from 'react';
+import { APP_COLORS } from '../../../../../color.config';
 
-import React, { useEffect, useState } from 'react';
+type Props = {
+  username: string;
+  email: string;
+  loading: boolean;
+  onBack: () => void;
+  onChangePassword: () => void;
+};
 
-import { APP_COLORS } from '../../../../color.config';
-import { ProfileRepository } from '../../../../infrastructure/repositories/ProfileRepository';
-import { useAuth } from '../../../state/AuthContext';
-
-export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const { user } = useAuth();
-  const [username, setUsername] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user?.id) return;
-      try {
-        setLoading(true);
-        const profile = await ProfileRepository.getProfile(user.id);
-        if (profile?.username) {
-          setUsername(profile.username);
-        }
-      } catch (error) {
-        console.error('プロファイル取得失敗:', error);
-        // エラー時はフォールバックとしてメールアドレスの@前を表示
-        setUsername(user.email?.split('@')[0] || 'ユーザー名未設定');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [user]);
-
+export const AccountInfoPresenter: React.FC<Props> = ({
+  username,
+  email,
+  loading,
+  onBack,
+  onChangePassword,
+}) => {
   return (
     <Box sx={{ p: 1, bgcolor: APP_COLORS.background, minHeight: '100vh' }}>
       {/* ヘッダー */}
@@ -50,7 +35,10 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         <IconButton onClick={onBack} sx={{ color: APP_COLORS.textPrimary }}>
           <ArrowBack />
         </IconButton>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', color: APP_COLORS.textPrimary }}>
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: 'bold', color: APP_COLORS.textPrimary }}
+        >
           アカウント情報
         </Typography>
       </Stack>
@@ -68,13 +56,21 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         >
           <Typography
             variant="caption"
-            sx={{ color: APP_COLORS.textPrimary, opacity: 0.6, mb: 1, display: 'block' }}
+            sx={{
+              color: APP_COLORS.textPrimary,
+              opacity: 0.6,
+              mb: 1,
+              display: 'block',
+            }}
           >
             ユーザー名
           </Typography>
           {loading ? (
             <Box sx={{ display: 'flex', alignItems: 'center', height: '32px' }}>
-              <CircularProgress size={20} sx={{ color: APP_COLORS.mainGreen }} />
+              <CircularProgress
+                size={20}
+                sx={{ color: APP_COLORS.mainGreen }}
+              />
             </Box>
           ) : (
             <TextField
@@ -107,14 +103,19 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         >
           <Typography
             variant="caption"
-            sx={{ color: APP_COLORS.textPrimary, opacity: 0.6, mb: 1, display: 'block' }}
+            sx={{
+              color: APP_COLORS.textPrimary,
+              opacity: 0.6,
+              mb: 1,
+              display: 'block',
+            }}
           >
             メールアドレス
           </Typography>
           <TextField
             fullWidth
             variant="standard"
-            value={user?.email || ''}
+            value={email}
             InputProps={{
               readOnly: true,
               disableUnderline: true,
@@ -140,7 +141,12 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         >
           <Typography
             variant="caption"
-            sx={{ color: APP_COLORS.textPrimary, opacity: 0.6, mb: 1, display: 'block' }}
+            sx={{
+              color: APP_COLORS.textPrimary,
+              opacity: 0.6,
+              mb: 1,
+              display: 'block',
+            }}
           >
             パスワード
           </Typography>
@@ -148,7 +154,7 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             fullWidth
             variant="standard"
             type="password"
-            value="********" // 完全に固定の伏字
+            value="********"
             InputProps={{
               readOnly: true,
               disableUnderline: true,
@@ -179,14 +185,17 @@ export const AccountInfo: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               bgcolor: 'rgba(62, 207, 142, 0.04)',
             },
           }}
-          onClick={() => alert('パスワード再設定メールを送信する機能を今後実装予定です。')}
+          onClick={onChangePassword}
         >
           パスワードを変更する
         </Button>
       </Box>
 
       <Box sx={{ mt: 4, textAlign: 'center' }}>
-        <Typography variant="caption" sx={{ color: APP_COLORS.textPrimary, opacity: 0.4 }}>
+        <Typography
+          variant="caption"
+          sx={{ color: APP_COLORS.textPrimary, opacity: 0.4 }}
+        >
           アカウントの管理についてお困りの場合は
           <br />
           サポートまでお問い合わせください

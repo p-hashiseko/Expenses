@@ -1,11 +1,15 @@
-export interface IncomeConfig {
-  id?: string;
+export type IncomeConfigInput = {
   userId: string;
   income_config_day: number;
   memo: string;
   amount: number;
-}
+  sort: number;
+};
 
-export interface IncomeConfigFront extends IncomeConfig {
-  tempId: string;
-}
+export type IncomeConfigOutput = {
+  userId: string;
+  income_config_day: number;
+  memo: string;
+  amount: number;
+  sort: number;
+};

@@ -21,13 +21,13 @@ import {
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 
 // プロジェクト固有のインポート
-import { APP_COLORS } from '../../../color.config';
-import { useAuth } from '../../state/AuthContext';
-import { AccountInfo } from './setting/AccountInfo';
-import { CategorySettingContainer } from './setting/CategorySetting/CategorySettingContainer';
-import { FixedCostSetting } from './setting/FixedCostSetting';
-import { ObjectiveSetting } from './setting/ObjectiveSetting';
-import { SalarySetting } from './setting/SlarySetting';
+import { APP_COLORS } from '../../../../color.config';
+import { useAuth } from '../../../state/AuthContext';
+import { CategorySettingContainer } from './CategorySetting/CategorySettingContainer';
+import { SalarySettingContainer } from './SlarySetting/SlarySettingContainer';
+import { FixedCostSettingContainer } from './FixedCostSetting/FixedCostSettingContainer';
+import { AccountInfoContainer } from './AccountInfo/AccountInfoContainer';
+import { ObjectiveSettingContainer } from './ObjectiveSetting/ObjectiveSettingContainer';
 
 // --- 型定義 ---
 export interface SettingsTabHandle {
@@ -84,13 +84,17 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
           <CategorySettingContainer onBack={() => setCurrentView('menu')} />
         );
       case 'account':
-        return <AccountInfo onBack={() => setCurrentView('menu')} />;
+        return <AccountInfoContainer onBack={() => setCurrentView('menu')} />;
       case 'fixed':
-        return <FixedCostSetting onBack={() => setCurrentView('menu')} />;
+        return (
+          <FixedCostSettingContainer onBack={() => setCurrentView('menu')} />
+        );
       case 'salary':
-        return <SalarySetting onBack={() => setCurrentView('menu')} />;
+        return <SalarySettingContainer onBack={() => setCurrentView('menu')} />;
       case 'objective':
-        return <ObjectiveSetting onBack={() => setCurrentView('menu')} />;
+        return (
+          <ObjectiveSettingContainer onBack={() => setCurrentView('menu')} />
+        );
       default:
         return null;
     }

@@ -80,8 +80,8 @@ export const CategorySettingPresenter: React.FC<PresenterProps> = (props) => {
         p: { xs: 1, sm: 2 },
         bgcolor: APP_COLORS.background,
         minHeight: '100vh',
-        maxWidth: 'md', // 幅を広げました
-        mx: 'auto', // 中央寄せ
+        maxWidth: 'md',
+        mx: 'auto',
       }}
     >
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 3 }}>
@@ -96,56 +96,68 @@ export const CategorySettingPresenter: React.FC<PresenterProps> = (props) => {
       <Stack
         direction={{ xs: 'column', md: 'row' }}
         spacing={3}
-        alignItems="flex-start"
+        alignItems="stretch" // 高さ（子要素）を揃える
+        sx={{
+          height: { md: '60vh' }, // PCサイズ時に高さを固定
+          minHeight: 400,
+        }}
       >
         {/* 左側：カテゴリ選択（チェックボックス） */}
         <Paper
           elevation={0}
           sx={{
             flex: 1,
-            p: 3,
+            display: 'flex',
+            flexDirection: 'column',
             border: `1px solid ${APP_COLORS.lightGray}`,
             borderRadius: 4,
-            width: '100%',
+            overflow: 'hidden', // Paperの角丸からはみ出さないように
           }}
         >
-          <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold' }}>
-            利用するカテゴリにチェック
-          </Typography>
-          <FormGroup
-            sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}
-          >
-            {categoryKeys.map((key) => (
-              <FormControlLabel
-                key={key}
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={selectedCategories.includes(key)}
-                    onChange={() => onToggleCategory(key)}
-                    sx={{
-                      color: APP_COLORS.mainGreen,
-                      '&.Mui-checked': { color: APP_COLORS.mainGreen },
-                    }}
-                  />
-                }
-                label={
-                  <Typography sx={{ fontSize: 14 }}>{CATEGORY[key]}</Typography>
-                }
-              />
-            ))}
-          </FormGroup>
+          <Box sx={{ p: 2, borderBottom: `1px solid ${APP_COLORS.lightGray}` }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+              利用するカテゴリにチェック
+            </Typography>
+          </Box>
+          <Box sx={{ p: 2, overflowY: 'auto', flex: 1 }}>
+            <FormGroup
+              sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}
+            >
+              {categoryKeys.map((key) => (
+                <FormControlLabel
+                  key={key}
+                  control={
+                    <Checkbox
+                      size="small"
+                      checked={selectedCategories.includes(key)}
+                      onChange={() => onToggleCategory(key)}
+                      sx={{
+                        color: APP_COLORS.mainGreen,
+                        '&.Mui-checked': { color: APP_COLORS.mainGreen },
+                      }}
+                    />
+                  }
+                  label={
+                    <Typography sx={{ fontSize: 14 }}>
+                      {CATEGORY[key]}
+                    </Typography>
+                  }
+                />
+              ))}
+            </FormGroup>
+          </Box>
         </Paper>
 
         {/* 右側：並び替えエリア */}
         <Paper
           elevation={0}
           sx={{
-            flex: 1.2, // 少し右側を広めに
+            flex: 1.2,
+            display: 'flex',
+            flexDirection: 'column',
             border: `1px solid ${APP_COLORS.lightGray}`,
             borderRadius: 4,
             overflow: 'hidden',
-            width: '100%',
           }}
         >
           <Box
@@ -159,42 +171,45 @@ export const CategorySettingPresenter: React.FC<PresenterProps> = (props) => {
               表示順（ドラッグで移動）
             </Typography>
           </Box>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={(e) => onDragStart(e.active.id as string)}
-            onDragEnd={onDragEnd}
-          >
-            <SortableContext
-              items={selectedCategories}
-              strategy={verticalListSortingStrategy}
+
+          <Box sx={{ flex: 1, overflowY: 'auto', bgcolor: APP_COLORS.white }}>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={(e) => onDragStart(e.active.id as string)}
+              onDragEnd={onDragEnd}
             >
-              <Box sx={{ minHeight: 400, bgcolor: APP_COLORS.white }}>
-                {selectedCategories.length === 0 ? (
-                  <Typography
-                    sx={{
-                      p: 4,
-                      textAlign: 'center',
-                      color: APP_COLORS.lightGray,
-                    }}
-                  >
-                    カテゴリを選択してください
-                  </Typography>
-                ) : (
-                  selectedCategories.map((cat, index) => (
-                    <SortableCategoryItem
-                      key={cat}
-                      id={cat}
-                      name={CATEGORY[cat]}
-                      index={index}
-                      onDelete={onDeleteCategory}
-                      isDragging={activeId === cat}
-                    />
-                  ))
-                )}
-              </Box>
-            </SortableContext>
-          </DndContext>
+              <SortableContext
+                items={selectedCategories}
+                strategy={verticalListSortingStrategy}
+              >
+                <Box sx={{ minHeight: '100%' }}>
+                  {selectedCategories.length === 0 ? (
+                    <Typography
+                      sx={{
+                        p: 4,
+                        textAlign: 'center',
+                        color: APP_COLORS.lightGray,
+                      }}
+                    >
+                      カテゴリを選択してください
+                    </Typography>
+                  ) : (
+                    selectedCategories.map((cat, index) => (
+                      <SortableCategoryItem
+                        key={cat}
+                        id={cat}
+                        name={CATEGORY[cat]}
+                        index={index}
+                        onDelete={onDeleteCategory}
+                        isDragging={activeId === cat}
+                      />
+                    ))
+                  )}
+                </Box>
+              </SortableContext>
+            </DndContext>
+          </Box>
         </Paper>
       </Stack>
 

@@ -1,60 +1,67 @@
-import type { FixedCostsConfigFront } from '../../domain/models/FixedCostsConfig';
 import { supabase } from '../supabase/client';
+import type {
+  FixedCostsConfigInput,
+  FixedCostsConfigOutput,
+} from '../../domain/models/FixedCostsConfig';
 
 export const FixedCostsConfigRepository = {
   /**
-   * 指定したユーザーの設定を取得する
+   * 指定したユーザーの固定費設定を取得する
    */
-  async getConfigs(userId: string): Promise<FixedCostsConfigFront[]> {
+  async getFixedConfig(userId: string): Promise<FixedCostsConfigOutput[]> {
     const { data, error } = await supabase
       .from('fixed_costs_config')
-      .select('*')
+      .select('user_id, memo, category, amount, payment_date, sort')
       .eq('user_id', userId)
-      .order('created_at', { ascending: true });
+      .order('sort', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      throw new Error('固定費設定の取得に失敗しました: ' + error.message);
+    }
 
-    return (data as any[]).map((row) => ({
-      tempId: crypto.randomUUID(),
-      id: row.id,
+    return (data || []).map((row) => ({
       userId: row.user_id,
-      categoryId: row.category_id,
-      amount: row.amount,
       memo: row.memo || '',
+      category: row.category,
+      amount: row.amount,
       paymentDate: row.payment_date,
-    }));
+      sort: row.sort,
+    })) as FixedCostsConfigOutput[];
   },
 
   /**
-   * 設定を保存する（全削除 -> 全挿入）
+   * 指定したユーザーの設定を削除する
    */
-  async saveConfigs(userId: string, configs: FixedCostsConfigFront[]): Promise<void> {
-    // 1. 現在のユーザーの設定をクリア
-    const { error: deleteError } = await supabase
+  async deleteFixedConfig(userId: string): Promise<void> {
+    const { error } = await supabase
       .from('fixed_costs_config')
       .delete()
       .eq('user_id', userId);
 
-    if (deleteError) throw deleteError;
+    if (error) {
+      throw new Error('固定費設定の削除に失敗しました: ' + error.message);
+    }
+  },
 
+  /**
+   * 指定したユーザーの設定を保存する
+   */
+  async saveFixedConfig(configs: FixedCostsConfigInput[]): Promise<void> {
     if (configs.length === 0) return;
 
-    // 2. 有効なデータのみをDB形式にマッピング
-    // 固定費の場合は amount > 0、変動費の場合は amount === null のものを対象とする
-    const toInsert = configs
-      .filter((c) => c.amount === null || (c.amount !== null && c.amount > 0))
-      .map((c) => ({
-        user_id: userId,
-        category_id: c.categoryId,
-        amount: c.amount,
-        memo: c.memo || '',
-        payment_date: c.paymentDate,
-      }));
+    const dbItems = configs.map((c) => ({
+      user_id: c.userId,
+      memo: c.memo || '',
+      category: c.category,
+      amount: c.amount,
+      payment_date: c.paymentDate,
+      sort: c.sort,
+    }));
 
-    if (toInsert.length === 0) return;
+    const { error } = await supabase.from('fixed_costs_config').insert(dbItems);
 
-    const { error: insertError } = await supabase.from('fixed_costs_config').insert(toInsert);
-
-    if (insertError) throw insertError;
+    if (error) {
+      throw new Error('固定費設定の保存に失敗しました: ' + error.message);
+    }
   },
 };

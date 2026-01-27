@@ -1,8 +1,12 @@
-export interface ExpensesObjectiveConfigFront {
-  tempId: string;
-  id?: string;
+export interface ExpensesObjectiveConfigInput {
   userId: string;
-  categoryId: string;
-  amount: number | null; // objective_amount
-  day: number; // payment_due_date
+  category: string;
+  objective_amount: number | null;
+  payment_due_date: number;
+}
+
+export interface ExpensesObjectiveConfigOutput {
+  category: string;
+  objective_amount: number | null;
+  payment_due_date: number;
 }

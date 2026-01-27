@@ -11,28 +11,28 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-
 import React from 'react';
+import { APP_COLORS } from '../../../../../../color.config';
+import { CATEGORY } from '../../../../../../domain/const/Category'; // インポート
+import type { CategoryConfigOutput } from '../../../../../../domain/models/CategoryConfig';
+import type { FixedCostsConfigOutput } from '../../../../../../domain/models/FixedCostsConfig';
+import {
+  formatCurrency,
+  sanitizeNumericInput,
+} from '../../../../../../utils/formatters';
+import { SecondaryAddButton } from '../../../../../components/SecondaryAddButton';
 
-import { APP_COLORS } from '../../color.config';
-import type { Category } from '../../domain/const/Category';
-import type { FixedCostsConfigFront } from '../../domain/models/FixedCostsConfig';
-import { formatCurrency, sanitizeNumericInput } from '../../utils/formatters';
-// 修正
-import { SecondaryAddButton } from './SecondaryAddButton';
-
-// 共通関数をインポート
+// UI管理用に tempId を付与した型を定義
+export interface FixedCostsConfigUI extends FixedCostsConfigOutput {
+  tempId: string;
+}
 
 // --- 1. 個別の行コンポーネント ---
 export type RecurringItemRowProps = {
-  item: FixedCostsConfigFront; // 修正
+  item: FixedCostsConfigUI;
   index: number;
-  categories: Category[];
-  onUpdate: (
-    index: number,
-    key: keyof FixedCostsConfigFront,
-    value: any,
-  ) => void; // 修正
+  categories: CategoryConfigOutput[];
+  onUpdate: (index: number, key: keyof FixedCostsConfigUI, value: any) => void;
   onRemove: (index: number) => void;
   amountDisabled?: boolean;
 };
@@ -59,18 +59,17 @@ export const RecurringItemRow: React.FC<RecurringItemRowProps> = ({
         <TextField
           label="毎月の日付"
           size="small"
-          value={item.paymentDate} // day -> paymentDate
-          // 数字以外の入力を防ぐため sanitizeNumericInput を適用しつつ数値化
-          onChange={(e) =>
-            onUpdate(
-              index,
-              'paymentDate',
-              Number(sanitizeNumericInput(e.target.value)),
-            )
-          }
+          value={item.paymentDate === 0 ? '' : item.paymentDate.toString()}
+          onChange={(e) => {
+            const val = sanitizeNumericInput(e.target.value);
+            const num = val === '' ? 0 : parseInt(val, 10);
+            if (num >= 0 && num <= 31) {
+              onUpdate(index, 'paymentDate', num);
+            }
+          }}
           sx={{ width: 140 }}
           InputProps={{
-            inputProps: { inputMode: 'numeric', min: 1, max: 31 },
+            inputMode: 'numeric',
             endAdornment: <Typography variant="caption">日</Typography>,
           }}
         />
@@ -78,13 +77,14 @@ export const RecurringItemRow: React.FC<RecurringItemRowProps> = ({
         <FormControl fullWidth size="small">
           <InputLabel>カテゴリ</InputLabel>
           <Select
-            value={item.categoryId}
+            value={item.category || ''}
             label="カテゴリ"
-            onChange={(e) => onUpdate(index, 'categoryId', e.target.value)}
+            onChange={(e) => onUpdate(index, 'category', e.target.value)}
           >
             {categories.map((cat) => (
-              <MenuItem key={cat.id} value={cat.id}>
-                {cat.category_name}
+              <MenuItem key={cat.sort} value={cat.category}>
+                {/* CATEGORY定数からマッピングして表示名称(value)を取得 */}
+                {CATEGORY[cat.category] || cat.category}
               </MenuItem>
             ))}
           </Select>
@@ -127,15 +127,11 @@ export const RecurringItemRow: React.FC<RecurringItemRowProps> = ({
           <TextField
             label="金額"
             size="small"
-            value={formatCurrency(item.amount ?? 0)} // formatNumber -> formatCurrency
-            // 全角・カンマ・マイナスを除去して数値に戻す
-            onChange={(e) =>
-              onUpdate(
-                index,
-                'amount',
-                Number(sanitizeNumericInput(e.target.value)),
-              )
-            }
+            value={formatCurrency(item.amount ?? 0)}
+            onChange={(e) => {
+              const val = sanitizeNumericInput(e.target.value);
+              onUpdate(index, 'amount', val === '' ? 0 : parseInt(val, 10));
+            }}
             sx={{ flex: 1.5, '& .MuiInputBase-input': { textAlign: 'right' } }}
             InputProps={{
               inputMode: 'numeric',
@@ -167,13 +163,9 @@ type RecurringSectionProps = {
   title: string;
   isFixed: boolean;
   icon: React.ReactNode;
-  items: FixedCostsConfigFront[]; // 修正
-  categories: Category[];
-  onUpdate: (
-    index: number,
-    key: keyof FixedCostsConfigFront,
-    value: any,
-  ) => void; // 修正
+  items: FixedCostsConfigUI[];
+  categories: CategoryConfigOutput[];
+  onUpdate: (index: number, key: keyof FixedCostsConfigUI, value: any) => void;
   onRemove: (index: number) => void;
   onAdd: (isFixed: boolean) => void;
   saving?: boolean;
@@ -190,7 +182,6 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({
   onAdd,
   saving = false,
 }) => {
-  // 表示対象だけをフィルタリング（固定費なら amount が null 以外）
   const displayItems = items.filter((item) =>
     isFixed ? item.amount !== null : item.amount === null,
   );
@@ -213,7 +204,6 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({
 
           return (
             <RecurringItemRow
-              // key に index ではなく tempId を使用することで安全に描画
               key={item.tempId}
               item={item}
               index={actualIndex}
