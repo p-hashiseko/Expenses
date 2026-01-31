@@ -27,14 +27,25 @@ export const ExpenseEntryContainer: React.FC = () => {
 
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
+
+  // 新規入力専用
   const [editValues, setEditValues] = useState<{
     [category: string]: { amount: string; memo: string };
   }>({});
+
+  const createEmptyEditValues = (cats: CategoryConfigOutput[]) => {
+    const empty: typeof editValues = {};
+    cats.forEach((cat) => {
+      empty[cat.category] = { amount: '', memo: '' };
+    });
+    return empty;
+  };
 
   const fetchData = async () => {
     if (!user) return;
     try {
       setLoading(true);
+
       const [catData, expData] = await Promise.all([
         CategoryConfigRepository.getCategoryConfig(user.id),
         ExpensesRepository.getExpensesByPeriod(
@@ -46,7 +57,9 @@ export const ExpenseEntryContainer: React.FC = () => {
 
       setCategories(catData);
       setExpenses(expData);
-      syncEditValues(expData, selectedDate, catData);
+
+      // 初回 or 再取得時は「空フォーム」
+      setEditValues(createEmptyEditValues(catData));
 
       setTimeout(() => {
         if (tableContainerRef.current) {
@@ -65,28 +78,10 @@ export const ExpenseEntryContainer: React.FC = () => {
     fetchData();
   }, [user]);
 
-  const syncEditValues = (
-    currentExpenses: ExpenseOutput[],
-    date: string,
-    currentCats: CategoryConfigOutput[],
-  ) => {
-    const newValues: { [category: string]: { amount: string; memo: string } } =
-      {};
-    currentCats.forEach((cat) => {
-      const target = currentExpenses.find(
-        (e) => e.payment_date === date && e.category === cat.category,
-      );
-      newValues[cat.category] = {
-        amount: target ? target.amount.toString() : '',
-        memo: target ? target.memo || '' : '',
-      };
-    });
-    setEditValues(newValues);
-  };
-
   const handleDateSelect = (date: string) => {
     setSelectedDate(date);
-    syncEditValues(expenses, date, categories);
+    // 日付を変えたら常に新規入力
+    setEditValues(createEmptyEditValues(categories));
   };
 
   const handleInputChange = (
@@ -106,32 +101,34 @@ export const ExpenseEntryContainer: React.FC = () => {
 
   const handleSave = async () => {
     if (!user) return;
+
     try {
       setSaving(true);
 
-      // 要望1: 金額が入力されており、かつ0円より大きいデータのみを抽出
-      const configsToSave: ExpenseInput[] = categories
-        .map((cat) => {
-          const edit = editValues[cat.category];
-          const amountNum = parseInt(edit.amount, 10);
+      const inputs: ExpenseInput[] = Object.entries(editValues)
+        .map(([category, value]) => {
+          const amount = parseInt(value.amount, 10);
+          if (!amount || amount <= 0) return null;
+
           return {
             userId: user.id,
-            category: cat.category,
-            amount: isNaN(amountNum) ? 0 : amountNum,
-            memo: edit.memo || null,
+            category,
+            amount,
+            memo: value.memo || null,
             payment_date: selectedDate,
           };
         })
-        .filter((item) => item.amount > 0);
+        .filter(Boolean) as ExpenseInput[];
 
-      // 既存のその日のデータを一旦リセットするか、Upsertするロジックが必要ですが、
-      // ここではシンプルに「入力があったものだけを保存」します。
-      for (const input of configsToSave) {
+      for (const input of inputs) {
         await ExpensesRepository.saveExpense(input);
       }
 
-      alert(`${selectedDate} のデータを保存しました`);
+      // 表・合計を更新
       await fetchData();
+
+      // 入力欄は次の追加用に空
+      setEditValues(createEmptyEditValues(categories));
     } catch (error) {
       console.error('保存失敗:', error);
     } finally {

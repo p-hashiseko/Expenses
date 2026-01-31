@@ -13,6 +13,7 @@ import {
   Stack,
   CircularProgress,
   InputAdornment,
+  Tooltip,
 } from '@mui/material';
 import { APP_COLORS } from '../../../../color.config';
 import { CATEGORY } from '../../../../domain/const/Category';
@@ -35,6 +36,19 @@ type Props = {
   onDateSelect: (date: string) => void;
   onInputChange: (cat: string, field: 'amount' | 'memo', val: string) => void;
   onSave: () => void;
+};
+
+const buildTodaySummary = (expenses: any[], date: string, category: string) => {
+  const records = expenses.filter(
+    (e) => e.payment_date === date && e.category === category,
+  );
+
+  const total = records.reduce((sum, r) => sum + r.amount, 0);
+
+  return {
+    total,
+    records, // amount + memo をそのまま持つ
+  };
 };
 
 export const ExpenseEntryPresenter: React.FC<Props> = (props) => {
@@ -231,6 +245,7 @@ export const ExpenseEntryPresenter: React.FC<Props> = (props) => {
                     // 要望2: 金額欄を2文字分(約30px)広くしました (130px -> 160px)
                     sx={{ width: '160px' }}
                   />
+
                   <TextField
                     size="small"
                     placeholder="メモ"
@@ -241,6 +256,54 @@ export const ExpenseEntryPresenter: React.FC<Props> = (props) => {
                     }
                   />
                 </Stack>
+                {(() => {
+                  const summary = buildTodaySummary(
+                    props.expenses,
+                    props.selectedDate,
+                    cat.category,
+                  );
+
+                  return (
+                    <Typography
+                      sx={{
+                        fontSize: '0.75rem',
+                        color: '#888',
+                        mt: 0.5,
+                        ml: 0.5,
+                      }}
+                    >
+                      合計：{formatCurrency(summary.total)} 円
+                      {summary.total > 0 && summary.records.length > 0 && (
+                        <>
+                          （
+                          {summary.records.map((r, idx) => (
+                            <React.Fragment key={idx}>
+                              <Tooltip
+                                title={r.memo || '（メモなし）'}
+                                arrow
+                                placement="top"
+                              >
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    textDecoration: r.memo
+                                      ? 'underline dotted'
+                                      : 'none',
+                                    cursor: r.memo ? 'help' : 'default',
+                                  }}
+                                >
+                                  {formatCurrency(r.amount)}
+                                </Box>
+                              </Tooltip>
+                              {idx < summary.records.length - 1 && ' + '}
+                            </React.Fragment>
+                          ))}
+                          ）
+                        </>
+                      )}
+                    </Typography>
+                  );
+                })()}
               </Box>
             ))}
           </Stack>

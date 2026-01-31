@@ -6,7 +6,6 @@ import {
   Container,
   Paper,
 } from '@mui/material';
-
 import React, { useRef, useState } from 'react';
 
 import { APP_COLORS } from '../../color.config';
@@ -16,8 +15,8 @@ import {
   SettingsTab,
   type SettingsTabHandle,
 } from './dashboard/setting/SettingsTab';
-import { WeeklySummaryTable } from './dashboard/WeeklySummaryTable';
 import { ExpenseEntryContainer } from './dashboard/ExpenseEntryContainer/ExpenseEntryContainer';
+import { ExpenseAnalysisContainer } from './dashboard/ExpenseAnalysisPage/ExpenseAnalysisContainer';
 
 export type TabType = 'registration' | 'summary' | 'analytics' | 'setting';
 
@@ -30,7 +29,7 @@ export const DashboardPage: React.FC = () => {
       case 'registration':
         return <ExpenseEntryContainer />;
       case 'summary':
-        return <WeeklySummaryTable />;
+        return <ExpenseAnalysisContainer />;
       case 'analytics':
         return <AnalysisTab />;
       case 'setting':
@@ -47,24 +46,6 @@ export const DashboardPage: React.FC = () => {
     setActiveTab(newValue);
   };
 
-  /**
-   * 表示幅の判定ロジック
-   * registration: グリッドとフォームを並べるため最大幅(lg以上)
-   * analytics/summary: 標準的な幅(md)
-   */
-  const getContainerMaxWidth = () => {
-    switch (activeTab) {
-      case 'registration':
-        return 'lg'; // 1200px。表が大きければ 'xl' (1536px) も検討
-      case 'analytics':
-      case 'summary':
-      case 'setting':
-        return 'md'; // 900px
-      default:
-        return 'md';
-    }
-  };
-
   return (
     <Box
       sx={{
@@ -75,18 +56,21 @@ export const DashboardPage: React.FC = () => {
       }}
     >
       <Header />
+
+      {/* ===== メインコンテンツ（全タブ共通 lg） ===== */}
       <Container
-        maxWidth={getContainerMaxWidth()}
+        maxWidth="lg"
         sx={{
           flex: 1,
           py: 3,
-          pb: 12,
+          pb: 12, // BottomNavigation 分の余白
           color: APP_COLORS.textPrimary,
-          transition: 'max-width 0.3s ease-in-out', // 幅の変化を滑らかに
         }}
       >
         {renderContent()}
       </Container>
+
+      {/* ===== Bottom Navigation ===== */}
       <Paper
         sx={{
           position: 'fixed',
