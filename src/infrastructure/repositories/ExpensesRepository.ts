@@ -77,4 +77,25 @@ export const ExpensesRepository = {
       payment_date: row.payment_date,
     }));
   },
+
+  /**
+   * 最古の支出レコードの年を取得
+   */
+  async getOldestExpenseYear(userId: string): Promise<number | null> {
+    const { data, error } = await supabase
+      .from('expenses')
+      .select('payment_date')
+      .eq('user_id', userId)
+      .order('payment_date', { ascending: true })
+      .limit(1);
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      return null;
+    }
+
+    const oldestDate = data[0].payment_date;
+    return new Date(oldestDate).getFullYear();
+  },
 };

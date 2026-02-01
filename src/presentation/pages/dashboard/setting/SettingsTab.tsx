@@ -1,4 +1,5 @@
 import {
+  AccountBalance,
   Category,
   ChevronRight,
   Logout,
@@ -28,6 +29,7 @@ import { SalarySettingContainer } from './SlarySetting/SlarySettingContainer';
 import { FixedCostSettingContainer } from './FixedCostSetting/FixedCostSettingContainer';
 import { AccountInfoContainer } from './AccountInfo/AccountInfoContainer';
 import { ObjectiveSettingContainer } from './ObjectiveSetting/ObjectiveSettingContainer';
+import { InitialBalanceSettingContainer } from './InitialBalanceSetting/InitialBalanceSettingContainer';
 
 // --- 型定義 ---
 export interface SettingsTabHandle {
@@ -40,7 +42,8 @@ type ViewType =
   | 'account'
   | 'fixed'
   | 'salary'
-  | 'objective';
+  | 'objective'
+  | 'initialBalance';
 
 interface MenuItem {
   id: ViewType;
@@ -74,6 +77,11 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
     { id: 'salary', label: '給料の設定', icon: <Payments /> },
     { id: 'fixed', label: '固定費・変動費の設定', icon: <Receipt /> },
     { id: 'objective', label: '目標の設定', icon: <TrackChanges /> },
+    {
+      id: 'initialBalance',
+      label: '初期所持金の設定',
+      icon: <AccountBalance />,
+    },
   ];
 
   // --- 表示切り替えロジック ---
@@ -94,6 +102,12 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
       case 'objective':
         return (
           <ObjectiveSettingContainer onBack={() => setCurrentView('menu')} />
+        );
+      case 'initialBalance':
+        return (
+          <InitialBalanceSettingContainer
+            onBack={() => setCurrentView('menu')}
+          />
         );
       default:
         return null;

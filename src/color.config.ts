@@ -21,4 +21,22 @@ export const APP_COLORS = {
   background: '#f5f5f5',
   white: '#ffffff',
   error: '#ef4444',
+
+  // カレンダー・日付用の色
+  today: {
+    header: '#fff3e0',
+    cell: '#fffde7',
+    text: '#e65100',
+    border: '#ffb74d',
+  },
+  sunday: {
+    header: '#ffebee',
+    cell: '#fff8f8',
+    text: '#c62828',
+  },
+  saturday: {
+    header: '#e3f2fd',
+    cell: '#f8fbff',
+    text: '#1565c0',
+  },
 } as const;

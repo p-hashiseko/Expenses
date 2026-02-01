@@ -1,4 +1,10 @@
-import { Assessment, Create, PieChart, Settings } from '@mui/icons-material';
+import {
+  Assessment,
+  Create,
+  TableChart,
+  Settings,
+  AttachMoney,
+} from '@mui/icons-material';
 import {
   BottomNavigation,
   BottomNavigationAction,
@@ -10,15 +16,21 @@ import React, { useRef, useState } from 'react';
 
 import { APP_COLORS } from '../../color.config';
 import { Header } from '../components/Header';
-import { AnalysisTab } from './dashboard/AnalysisTab';
 import {
   SettingsTab,
   type SettingsTabHandle,
 } from './dashboard/setting/SettingsTab';
 import { ExpenseEntryContainer } from './dashboard/ExpenseEntryContainer/ExpenseEntryContainer';
+import { IncomeEntryContainer } from './dashboard/IncomeEntryPage/IncomeEntryContainer';
 import { ExpenseAnalysisContainer } from './dashboard/ExpenseAnalysisPage/ExpenseAnalysisContainer';
+import { ExpenseDetailContainer } from './dashboard/ExpenseDetailPage/ExpenseDetailContainer';
 
-export type TabType = 'registration' | 'summary' | 'analytics' | 'setting';
+export type TabType =
+  | 'registration'
+  | 'income'
+  | 'summary'
+  | 'detail'
+  | 'setting';
 
 export const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('registration');
@@ -28,10 +40,12 @@ export const DashboardPage: React.FC = () => {
     switch (activeTab) {
       case 'registration':
         return <ExpenseEntryContainer />;
+      case 'income':
+        return <IncomeEntryContainer />;
       case 'summary':
         return <ExpenseAnalysisContainer />;
-      case 'analytics':
-        return <AnalysisTab />;
+      case 'detail':
+        return <ExpenseDetailContainer />;
       case 'setting':
         return <SettingsTab ref={settingsTabRef} />;
       default:
@@ -102,14 +116,19 @@ export const DashboardPage: React.FC = () => {
             icon={<Create />}
           />
           <BottomNavigationAction
+            label="給料"
+            value="income"
+            icon={<AttachMoney />}
+          />
+          <BottomNavigationAction
+            label="詳細"
+            value="detail"
+            icon={<TableChart />}
+          />
+          <BottomNavigationAction
             label="閲覧"
             value="summary"
             icon={<Assessment />}
-          />
-          <BottomNavigationAction
-            label="分析"
-            value="analytics"
-            icon={<PieChart />}
           />
           <BottomNavigationAction
             label="設定"

@@ -15,6 +15,7 @@ import {
   InputAdornment,
   Tooltip,
 } from '@mui/material';
+import { isWeekend, isSunday, parseISO } from 'date-fns';
 import { APP_COLORS } from '../../../../color.config';
 import { CATEGORY } from '../../../../domain/const/Category';
 import { PrimaryActionButton } from '../../../components/PrimaryActionButton';
@@ -100,6 +101,9 @@ export const ExpenseEntryPresenter: React.FC<Props> = (props) => {
               {props.dates.map((date) => {
                 const isToday = date === props.todayStr;
                 const isSelected = props.selectedDate === date;
+                const dateObj = parseISO(date);
+                const isSun = isSunday(dateObj);
+                const isSat = isWeekend(dateObj) && !isSun;
 
                 return (
                   <TableCell
@@ -111,13 +115,21 @@ export const ExpenseEntryPresenter: React.FC<Props> = (props) => {
                       bgcolor: isSelected
                         ? APP_COLORS.mainGreen
                         : isToday
-                          ? '#fff3e0'
-                          : APP_COLORS.lightGray,
+                          ? APP_COLORS.today.header
+                          : isSun
+                            ? APP_COLORS.sunday.header
+                            : isSat
+                              ? APP_COLORS.saturday.header
+                              : APP_COLORS.lightGray,
                       color: isSelected
                         ? 'white'
                         : isToday
-                          ? '#e65100'
-                          : 'inherit',
+                          ? APP_COLORS.today.text
+                          : isSun
+                            ? APP_COLORS.sunday.text
+                            : isSat
+                              ? APP_COLORS.saturday.text
+                              : 'inherit',
                       minWidth: 90,
                       fontWeight: isSelected || isToday ? 'bold' : 'normal',
                       transition: '0.2s',
@@ -148,12 +160,20 @@ export const ExpenseEntryPresenter: React.FC<Props> = (props) => {
                   {CATEGORY[cat.category] || cat.category}
                 </TableCell>
                 {props.dates.map((date) => {
-                  const data = props.expenses.find(
+                  // 同じ日付・カテゴリの支出を合計
+                  const matchingExpenses = props.expenses.filter(
                     (e) =>
                       e.payment_date === date && e.category === cat.category,
                   );
+                  const totalAmount = matchingExpenses.reduce(
+                    (sum, e) => sum + e.amount,
+                    0,
+                  );
                   const isToday = date === props.todayStr;
                   const isSelected = props.selectedDate === date;
+                  const dateObj = parseISO(date);
+                  const isSun = isSunday(dateObj);
+                  const isSat = isWeekend(dateObj) && !isSun;
 
                   return (
                     <TableCell
@@ -164,15 +184,19 @@ export const ExpenseEntryPresenter: React.FC<Props> = (props) => {
                         bgcolor: isSelected
                           ? '#f1f8f1'
                           : isToday
-                            ? '#fffde7'
-                            : 'white',
+                            ? APP_COLORS.today.cell
+                            : isSun
+                              ? APP_COLORS.sunday.cell
+                              : isSat
+                                ? APP_COLORS.saturday.cell
+                                : 'white',
                         border: '1px solid #f0f0f0',
                         cursor: 'pointer',
                         '&:hover': { bgcolor: '#fafafa' },
-                        color: data ? 'inherit' : '#ccc',
+                        color: totalAmount > 0 ? 'inherit' : '#ccc',
                       }}
                     >
-                      {data ? formatCurrency(data.amount) : '-'}
+                      {totalAmount > 0 ? formatCurrency(totalAmount) : '-'}
                     </TableCell>
                   );
                 })}
