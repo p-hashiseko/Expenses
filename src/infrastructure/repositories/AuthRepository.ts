@@ -14,7 +14,7 @@ export const AuthRepository = {
       .single();
 
     if (userError || !userData) {
-      throw new Error('ユーザー名が見つかりません');
+      throw new Error('ユーザー名かパスワードに誤りがあります');
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -22,10 +22,49 @@ export const AuthRepository = {
       password: password,
     });
 
-    if (error) throw new Error(error.message);
-    if (!data.user) throw new Error('ユーザーが見つかりません');
+    if (error) throw new Error('ユーザー名かパスワードに誤りがあります');
+    if (!data.user) throw new Error('ユーザー名かパスワードに誤りがあります');
 
     return { id: data.user.id, email: data.user.email };
+  },
+
+  async signUp(
+    username: string,
+    email: string,
+    password: string,
+  ): Promise<void> {
+    // ユーザー名の重複チェック
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('username', username)
+      .single();
+
+    if (existingUser) {
+      throw new Error('このユーザー名は既に使用されています');
+    }
+
+    // Supabase Authでユーザー作成
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) throw new Error(error.message);
+    if (!data.user) throw new Error('アカウントの作成に失敗しました');
+
+    // profilesテーブルにユーザー名を登録
+    const { error: profileError } = await supabase.from('profiles').insert([
+      {
+        id: data.user.id,
+        username,
+        email,
+      },
+    ]);
+
+    if (profileError) {
+      throw new Error('プロフィールの作成に失敗しました');
+    }
   },
 
   async signOut(): Promise<void> {

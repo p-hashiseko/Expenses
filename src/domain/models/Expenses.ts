@@ -7,6 +7,7 @@ export interface ExpenseInput {
 }
 
 export interface ExpenseOutput {
+  id: number;
   userId: string;
   category: string;
   amount: number;

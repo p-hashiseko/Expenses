@@ -6,6 +6,7 @@ import { ExpensesRepository } from '../../../../infrastructure/repositories/Expe
 import { CategoryConfigRepository } from '../../../../infrastructure/repositories/CategoryConfigRepository';
 import { ExpensesObjectiveConfigRepository } from '../../../../infrastructure/repositories/ExpensesObjectiveConfigRepository';
 import { IncomeRepository } from '../../../../infrastructure/repositories/IncomeRepository';
+import { InvestmentRepository } from '../../../../infrastructure/repositories/InvestmentRepository';
 import { CATEGORY } from '../../../../domain/const/Category';
 
 // カテゴリごとの色を定義
@@ -27,7 +28,6 @@ const CATEGORY_COLORS: Record<string, string> = {
   SPEC_TOTAL: '#c7254e',
   SPEC_INSURANCE_TOTAL: '#5cb85c',
   SPEC_SCHOLARSHIP: '#f0ad4e',
-  SPEC_INVESTMENT: '#5bc0de',
   OTHERS: '#999999',
 };
 
@@ -118,6 +118,7 @@ export const ExpenseAnalysisContainer: React.FC = () => {
           totalIncome,
           allExpenses,
           periodIncome,
+          investmentTotal,
         ] = await Promise.all([
           ExpensesRepository.getExpensesByPeriod(user.id, startDate, endDate),
           CategoryConfigRepository.getCategoryConfig(user.id),
@@ -125,6 +126,7 @@ export const ExpenseAnalysisContainer: React.FC = () => {
           IncomeRepository.getTotalIncome(user.id),
           ExpensesRepository.getExpenses(user.id), // 全期間の支出
           IncomeRepository.getIncomeByPeriod(user.id, startDate, endDate), // 期間の収入
+          InvestmentRepository.calculateInvestmentTotal(user.id), // 投資額合計
         ]);
 
         // 目標金額をカテゴリ別にマップ（年モードの場合は12倍）
@@ -141,34 +143,23 @@ export const ExpenseAnalysisContainer: React.FC = () => {
         expenses.forEach((expense) => {
           const cat = expense.category;
           categoryTotals[cat] = (categoryTotals[cat] || 0) + expense.amount;
-          // 投資カテゴリは支出から除外
-          if (cat !== 'SPEC_INVESTMENT') {
-            periodExpenseAmount += expense.amount;
-          }
+          periodExpenseAmount += expense.amount;
         });
 
         // 期間の収支 = 期間の収入 - 期間の支出
         const periodBalance = periodIncome - periodExpenseAmount;
 
         // 資産計算用：全期間のデータを集計
-        let totalExpenseAmount = 0;
-        let investmentAmount = 0;
-
-        allExpenses.forEach((expense) => {
-          // 投資カテゴリの金額を集計
-          if (expense.category === 'SPEC_INVESTMENT') {
-            investmentAmount += expense.amount;
-          } else {
-            // 投資以外を支出に計上
-            totalExpenseAmount += expense.amount;
-          }
-        });
+        const totalExpenseAmount = allExpenses.reduce(
+          (sum, expense) => sum + expense.amount,
+          0,
+        );
 
         // 現金 = 収入合計 - 支出合計（全期間）
         const cash = totalIncome - totalExpenseAmount;
 
-        // 総資産 = 現金 + 金融資産（投資）
-        const totalAssets = cash + investmentAmount;
+        // 総資産 = 現金 + 投資額
+        const totalAssets = cash + investmentTotal;
 
         // 月別に支出を集計（年モード用）
         const monthlyTotals: number[] = Array(12).fill(0);
@@ -195,7 +186,7 @@ export const ExpenseAnalysisContainer: React.FC = () => {
         setData({
           totalAssets,
           cash,
-          investment: investmentAmount,
+          investment: investmentTotal,
           categories,
           monthlyTotals,
           periodIncome,

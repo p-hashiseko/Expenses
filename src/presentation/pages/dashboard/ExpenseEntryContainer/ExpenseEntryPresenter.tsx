@@ -154,7 +154,6 @@ export const ExpenseEntryPresenter: React.FC<Props> = (props) => {
                     left: 0,
                     zIndex: 5,
                     borderRight: `2px solid ${APP_COLORS.background}`,
-                    boxShadow: '2px 0 4px rgba(0,0,0,0.05)',
                   }}
                 >
                   {CATEGORY[cat.category] || cat.category}

@@ -1,4 +1,4 @@
-import type { IncomeInput } from '../../domain/models/Income';
+import type { IncomeInput, IncomeOutput } from '../../domain/models/Income';
 import { supabase } from '../supabase/client';
 
 export const IncomeRepository = {
@@ -22,7 +22,7 @@ export const IncomeRepository = {
   /**
    * 特定ユーザーの給料一覧を取得
    */
-  async getIncomes(userId: string): Promise<any[]> {
+  async getIncomes(userId: string): Promise<IncomeOutput[]> {
     const { data, error } = await supabase
       .from('income')
       .select('*')
@@ -31,7 +31,13 @@ export const IncomeRepository = {
 
     if (error) throw error;
 
-    return data || [];
+    return (data || []).map((row) => ({
+      id: row.id,
+      userId: row.user_id,
+      amount: row.amount,
+      memo: row.memo,
+      income_day: row.income_day,
+    }));
   },
 
   /**
@@ -99,5 +105,61 @@ export const IncomeRepository = {
     if (error) {
       throw new Error('初期所持金の削除に失敗しました: ' + error.message);
     }
+  },
+
+  /**
+   * 指定した期間の収入データを取得
+   */
+  async getIncomesByPeriod(
+    userId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<IncomeOutput[]> {
+    const { data, error } = await supabase
+      .from('income')
+      .select('*')
+      .eq('user_id', userId)
+      .not('income_day', 'is', null)
+      .gte('income_day', startDate)
+      .lte('income_day', endDate)
+      .order('income_day', { ascending: true });
+
+    if (error) throw error;
+
+    return (data || []).map((row) => ({
+      id: row.id,
+      userId: row.user_id,
+      amount: row.amount,
+      memo: row.memo,
+      income_day: row.income_day,
+    }));
+  },
+
+  /**
+   * 更新: 特定の収入レコードを更新
+   */
+  async updateIncome(
+    id: number,
+    amount: number,
+    memo: string | null,
+  ): Promise<void> {
+    const { error } = await supabase
+      .from('income')
+      .update({
+        amount,
+        memo,
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+  },
+
+  /**
+   * 削除: 特定の収入レコードを削除
+   */
+  async deleteIncome(id: number): Promise<void> {
+    const { error } = await supabase.from('income').delete().eq('id', id);
+
+    if (error) throw error;
   },
 };

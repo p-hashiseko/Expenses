@@ -15,6 +15,7 @@ export const ExpensesRepository = {
     if (error) throw error;
 
     return (data as any[]).map((row) => ({
+      id: row.id,
       userId: row.user_id,
       category: row.category,
       amount: row.amount,
@@ -70,6 +71,7 @@ export const ExpensesRepository = {
     if (error) throw error;
 
     return (data as any[]).map((row) => ({
+      id: row.id,
       userId: row.user_id,
       category: row.category,
       amount: row.amount,
@@ -97,5 +99,33 @@ export const ExpensesRepository = {
 
     const oldestDate = data[0].payment_date;
     return new Date(oldestDate).getFullYear();
+  },
+
+  /**
+   * 更新: 特定の支出レコードを更新
+   */
+  async updateExpense(
+    id: number,
+    amount: number,
+    memo: string | null,
+  ): Promise<void> {
+    const { error } = await supabase
+      .from('expenses')
+      .update({
+        amount,
+        memo,
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+  },
+
+  /**
+   * 削除: 特定の支出レコードを削除
+   */
+  async deleteExpense(id: number): Promise<void> {
+    const { error } = await supabase.from('expenses').delete().eq('id', id);
+
+    if (error) throw error;
   },
 };

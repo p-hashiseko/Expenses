@@ -1,10 +1,4 @@
-import {
-  Assessment,
-  Create,
-  TableChart,
-  Settings,
-  AttachMoney,
-} from '@mui/icons-material';
+import { Assessment, TableChart, Settings } from '@mui/icons-material';
 import {
   BottomNavigation,
   BottomNavigationAction,
@@ -20,36 +14,33 @@ import {
   SettingsTab,
   type SettingsTabHandle,
 } from './dashboard/setting/SettingsTab';
-import { ExpenseEntryContainer } from './dashboard/ExpenseEntryContainer/ExpenseEntryContainer';
-import { IncomeEntryContainer } from './dashboard/IncomeEntryPage/IncomeEntryContainer';
 import { ExpenseAnalysisContainer } from './dashboard/ExpenseAnalysisPage/ExpenseAnalysisContainer';
 import { ExpenseDetailContainer } from './dashboard/ExpenseDetailPage/ExpenseDetailContainer';
 
-export type TabType =
-  | 'registration'
-  | 'income'
-  | 'summary'
-  | 'detail'
-  | 'setting';
+export type TabType = 'manage' | 'summary' | 'setting';
 
 export const DashboardPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('registration');
+  const [activeTab, setActiveTab] = useState<TabType>('manage');
   const settingsTabRef = useRef<SettingsTabHandle>(null);
+
+  const handleUserNameClick = () => {
+    setActiveTab('setting');
+    // 次のレンダリング後にアカウント情報画面に遷移
+    setTimeout(() => {
+      settingsTabRef.current?.navigateToAccount();
+    }, 0);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'registration':
-        return <ExpenseEntryContainer />;
-      case 'income':
-        return <IncomeEntryContainer />;
+      case 'manage':
+        return <ExpenseDetailContainer />;
       case 'summary':
         return <ExpenseAnalysisContainer />;
-      case 'detail':
-        return <ExpenseDetailContainer />;
       case 'setting':
         return <SettingsTab ref={settingsTabRef} />;
       default:
-        return <ExpenseEntryContainer />;
+        return <ExpenseDetailContainer />;
     }
   };
 
@@ -69,7 +60,7 @@ export const DashboardPage: React.FC = () => {
         bgcolor: APP_COLORS.background,
       }}
     >
-      <Header />
+      <Header onUserNameClick={handleUserNameClick} />
 
       {/* ===== メインコンテンツ（全タブ共通 lg） ===== */}
       <Container
@@ -94,7 +85,6 @@ export const DashboardPage: React.FC = () => {
           zIndex: 1000,
           borderRadius: '16px 16px 0 0',
         }}
-        elevation={4}
       >
         <BottomNavigation
           showLabels
@@ -111,18 +101,8 @@ export const DashboardPage: React.FC = () => {
           }}
         >
           <BottomNavigationAction
-            label="入力"
-            value="registration"
-            icon={<Create />}
-          />
-          <BottomNavigationAction
-            label="給料"
-            value="income"
-            icon={<AttachMoney />}
-          />
-          <BottomNavigationAction
-            label="詳細"
-            value="detail"
+            label="管理"
+            value="manage"
             icon={<TableChart />}
           />
           <BottomNavigationAction

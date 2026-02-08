@@ -40,7 +40,6 @@ export const SortableCategoryItem: React.FC<SortableCategoryItemProps> = ({
         alignItems: 'center',
         p: 1.5,
         bgcolor: APP_COLORS.white,
-        boxShadow: isDragging ? '0 8px 20px rgba(0,0,0,0.15)' : 'none',
         borderBottom: `1px solid ${APP_COLORS.lightGray}`,
       }}
     >

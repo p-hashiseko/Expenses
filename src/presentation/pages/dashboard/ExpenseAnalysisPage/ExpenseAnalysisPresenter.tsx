@@ -83,7 +83,7 @@ export const ExpenseAnalysisPresenter: React.FC<PresenterProps> = ({
           </ToggleButtonGroup>
         </Box>
 
-        <Paper sx={{ mb: 4, borderRadius: 2 }}>
+        <Paper sx={{ mb: 4, borderRadius: 2 }} variant="outlined" elevation={0}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs
               value={years.indexOf(year)}
@@ -115,34 +115,36 @@ export const ExpenseAnalysisPresenter: React.FC<PresenterProps> = ({
         <Grid container spacing={3}>
           {/* Left */}
           <Grid size={{ xs: 12, md: 3 }}>
-            <Paper variant="outlined" sx={{ p: 3, height: '100%' }}>
+            <Paper variant="outlined" sx={{ p: 2 }}>
               <Typography variant="subtitle2" color="text.secondary">
                 総資産
               </Typography>
-              <Typography variant="h4" fontWeight="bold" mb={4}>
+              <Typography variant="h4" fontWeight="bold" mb={3}>
                 ¥{data.totalAssets.toLocaleString()}
               </Typography>
-
               <Typography variant="caption" color="text.secondary">
                 現金
               </Typography>
-              <Typography variant="h6">
+              <Typography variant="h6" mb={2}>
                 ¥{data.cash.toLocaleString()}
               </Typography>
-
-              <Typography mt={2} variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary">
                 金融資産
               </Typography>
-              <Typography variant="h6">
-                ¥{data.investment.toLocaleString()}
-              </Typography>
+              <Typography variant="h6" mb={2}>
+                ￥{data.investment?.toLocaleString() || 0}
+              </Typography>{' '}
             </Paper>
           </Grid>
 
           {/* Right */}
           <Grid size={{ xs: 12, md: 9 }}>
             {/* 期間の収支情報 */}
-            <Paper sx={{ mb: 2, p: 2, borderRadius: 2 }}>
+            <Paper
+              sx={{ mb: 2, p: 2, borderRadius: 2 }}
+              variant="outlined"
+              elevation={0}
+            >
               <Typography
                 variant="h6"
                 fontWeight="bold"
@@ -195,7 +197,7 @@ export const ExpenseAnalysisPresenter: React.FC<PresenterProps> = ({
               </Box>
             </Paper>
 
-            <Paper variant="outlined" sx={{ p: 3 }}>
+            <Paper variant="outlined" sx={{ p: 3 }} elevation={0}>
               <Grid container spacing={4}>
                 {/* BarChart */}
                 <Grid size={{ xs: 12, lg: 6 }}>

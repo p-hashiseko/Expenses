@@ -41,12 +41,9 @@ export const CATEGORY: Record<string, string> = {
   GIFT_SOCIAL: '交際費',
 
   // --- 特別な支出・固定費・投資 ---
-  SPEC_TOTAL: '特別費(ご祝儀など）',
+  SPEC_TOTAL: '特別費',
   SPEC_INSURANCE_TOTAL: '保険料',
   SPEC_SCHOLARSHIP: '奨学金',
-
-  // --- 投資 ---
-  SPEC_INVESTMENT: '投資',
 
   // --- その他 ---
   OTHERS: '雑費',

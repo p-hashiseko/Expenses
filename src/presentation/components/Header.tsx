@@ -1,11 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { AppBar, Toolbar, Typography, Box, Chip, Skeleton } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  Chip,
+  Skeleton,
+} from '@mui/material';
 import { AccountCircle } from '@mui/icons-material';
 import { useAuth } from '../state/AuthContext';
 import { APP_COLORS } from '../../color.config';
 import { ProfileRepository } from '../../infrastructure/repositories/ProfileRepository';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onUserNameClick?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
   const { user } = useAuth();
   const [username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,17 +63,29 @@ export const Header: React.FC = () => {
 
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {loading ? (
-            <Skeleton variant="rounded" width={80} height={32} sx={{ borderRadius: '16px' }} />
+            <Skeleton
+              variant="rounded"
+              width={80}
+              height={32}
+              sx={{ borderRadius: '16px' }}
+            />
           ) : (
             <Chip
               icon={<AccountCircle style={{ color: APP_COLORS.mainGreen }} />}
               label={username}
               variant="outlined"
+              onClick={onUserNameClick}
               sx={{
                 borderColor: APP_COLORS.lightGray,
                 color: APP_COLORS.textPrimary,
                 fontWeight: '600',
                 px: 1,
+                cursor: onUserNameClick ? 'pointer' : 'default',
+                '&:hover': onUserNameClick
+                  ? {
+                      bgcolor: 'rgba(0, 0, 0, 0.04)',
+                    }
+                  : {},
               }}
             />
           )}

@@ -34,6 +34,7 @@ import { InitialBalanceSettingContainer } from './InitialBalanceSetting/InitialB
 // --- 型定義 ---
 export interface SettingsTabHandle {
   resetView: () => void;
+  navigateToAccount: () => void;
 }
 
 type ViewType =
@@ -59,6 +60,7 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
 
   useImperativeHandle(ref, () => ({
     resetView: () => setCurrentView('menu'),
+    navigateToAccount: () => setCurrentView('account'),
   }));
 
   const handleLogout = async () => {

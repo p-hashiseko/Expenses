@@ -12,18 +12,22 @@ import {
   CircularProgress,
   Tabs,
   Tab,
+  Tooltip,
 } from '@mui/material';
 import { APP_COLORS } from '../../../../color.config';
 import { CATEGORY } from '../../../../domain/const/Category';
 import { formatCurrency } from '../../../../utils/formatters';
 import { format, parseISO, isWeekend, isSunday } from 'date-fns';
 import { ja } from 'date-fns/locale';
+import { ExpenseInputDialog } from './ExpenseInputDialog';
 
 type Props = {
   tableContainerRef: React.RefObject<HTMLDivElement | null>;
   dates: string[];
   categories: any[];
   expenses: any[];
+  incomes: any[];
+  investments: any[];
   todayStr: string;
   loading: boolean;
   selectedYear: number;
@@ -32,6 +36,20 @@ type Props = {
   months: number[];
   onYearChange: (year: number) => void;
   onMonthChange: (month: number) => void;
+  dialogOpen: boolean;
+  selectedCategory: string;
+  selectedDate: string;
+  onCellClick: (category: string, date: string) => void;
+  onDialogClose: () => void;
+  onExpenseAdd: (amount: number, memo: string) => void;
+  onExpenseUpdate: (id: number, amount: number, memo: string) => void;
+  onExpenseDelete: (id: number) => void;
+  onIncomeAdd: (amount: number, memo: string) => void;
+  onIncomeUpdate: (id: number, amount: number, memo: string) => void;
+  onIncomeDelete: (id: number) => void;
+  onInvestmentAdd: (amount: number, memo: string) => void;
+  onInvestmentUpdate: (id: number, amount: number, memo: string) => void;
+  onInvestmentDelete: (id: number) => void;
 };
 
 const formatDayCell = (dateStr: string) => {
@@ -64,13 +82,107 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
       .reduce((sum, e) => sum + e.amount, 0);
   };
 
-  // 月間総合計
+  // 日別収入合計を計算
+  const getDayIncome = (date: string) => {
+    return props.incomes
+      .filter((i) => i.income_day === date)
+      .reduce((sum, i) => sum + i.amount, 0);
+  };
+
+  // 月間収入合計
+  const monthlyIncome = props.incomes.reduce((sum, i) => sum + i.amount, 0);
+
+  // 月間総合計（支出）
   const monthlyTotal = props.expenses.reduce((sum, e) => sum + e.amount, 0);
+
+  // 月間投資合計（in - out）
+  const monthlyInvestment = props.investments.reduce((sum, inv) => {
+    if (inv.flow === 'in') return sum + inv.amount;
+    else return sum - inv.amount;
+  }, 0);
+
+  // 日別投資金額を取得（in - out）
+  const getDayInvestment = (date: string) => {
+    return props.investments
+      .filter((inv) => inv.invest_day === date)
+      .reduce((sum, inv) => {
+        if (inv.flow === 'in') return sum + inv.amount;
+        else return sum - inv.amount;
+      }, 0);
+  };
+
+  // ツールチップコンテンツを生成（給料用）
+  const formatIncomeTooltip = (date: string): string => {
+    const incomes = props.incomes.filter((inc) => inc.income_day === date);
+    if (incomes.length === 0) return '';
+
+    const lines: string[] = [];
+    const formattedDate = format(parseISO(date), 'yyyy/MM/dd', {
+      locale: ja,
+    });
+    incomes.forEach((income) => {
+      lines.push(
+        `${formattedDate}  ${formatCurrency(income.amount)}  ${income.memo || ''}`,
+      );
+    });
+    lines.push('────────────────────');
+    const total = incomes.reduce((sum, i) => sum + i.amount, 0);
+    lines.push(`合計: ${formatCurrency(total)}`);
+    return lines.join('\n');
+  };
+
+  // ツールチップコンテンツを生成（支出用）
+  const formatExpenseTooltip = (category: string, date: string): string => {
+    const matchingExpenses = props.expenses.filter(
+      (e) => e.payment_date === date && e.category === category,
+    );
+    if (matchingExpenses.length === 0) return '';
+
+    const lines: string[] = [];
+    const formattedDate = format(parseISO(date), 'yyyy/MM/dd', {
+      locale: ja,
+    });
+    matchingExpenses.forEach((exp) => {
+      lines.push(
+        `${formattedDate}  ${formatCurrency(exp.amount)}  ${exp.memo || ''}`,
+      );
+    });
+    lines.push('────────────────────');
+    const total = matchingExpenses.reduce((sum, e) => sum + e.amount, 0);
+    lines.push(`合計: ${formatCurrency(total)}`);
+    return lines.join('\n');
+  };
+
+  // ツールチップコンテンツを生成（投資用）
+  const formatInvestmentTooltip = (date: string): string => {
+    const investments = props.investments.filter(
+      (inv) => inv.invest_day === date,
+    );
+    if (investments.length === 0) return '';
+
+    const lines: string[] = [];
+    const formattedDate = format(parseISO(date), 'yyyy/MM/dd', {
+      locale: ja,
+    });
+    investments.forEach((investment) => {
+      const flowLabel = investment.flow === 'in' ? '増やす' : '減らす';
+      lines.push(
+        `${formattedDate}  ${formatCurrency(investment.amount)}  ${flowLabel}`,
+      );
+    });
+    lines.push('────────────────────');
+    const total = investments.reduce((sum, inv) => {
+      if (inv.flow === 'in') return sum + inv.amount;
+      else return sum - inv.amount;
+    }, 0);
+    lines.push(`合計: ${formatCurrency(total)}`);
+    return lines.join('\n');
+  };
 
   return (
     <Box sx={{ p: 1, display: 'flex', flexDirection: 'column' }}>
       {/* ヘッダー: 年月選択 */}
-      <Paper sx={{ mb: 2, borderRadius: 2 }}>
+      <Paper sx={{ mb: 2, borderRadius: 2 }} elevation={0}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs
             value={props.years.indexOf(props.selectedYear)}
@@ -98,13 +210,90 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
       </Paper>
 
       {/* 月間合計表示 */}
-      <Paper sx={{ mb: 2, p: 2, borderRadius: 2 }}>
-        <Typography variant="h6" fontWeight="bold" color={APP_COLORS.mainGreen}>
-          {props.selectedYear}年{props.selectedMonth}月の合計：
-          <Box component="span" sx={{ ml: 1 }}>
-            {formatCurrency(monthlyTotal)} 円
-          </Box>
-        </Typography>
+      <Paper sx={{ mb: 2, borderRadius: 2 }} variant="outlined" elevation={0}>
+        <Box sx={{ p: 2, pb: 0 }}>
+          <Typography variant="h6" fontWeight="bold" color="text.primary">
+            {props.selectedYear}年{props.selectedMonth}月の合計
+          </Typography>
+        </Box>
+        <Table size="small" sx={{ border: '1px solid #e0e0e0' }}>
+          <TableHead>
+            <TableRow>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: 'bold', borderRight: '1px solid #e0e0e0' }}
+              >
+                収支
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: 'bold', borderRight: '1px solid #e0e0e0' }}
+              >
+                収入
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: 'bold', borderRight: '1px solid #e0e0e0' }}
+              >
+                支出
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+                投資額
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell
+                align="center"
+                sx={{ borderRight: '1px solid #e0e0e0' }}
+              >
+                <Typography
+                  variant="h6"
+                  fontWeight="bold"
+                  color={
+                    monthlyIncome - monthlyTotal >= 0
+                      ? APP_COLORS.mainGreen
+                      : 'error.main'
+                  }
+                >
+                  {formatCurrency(monthlyIncome - monthlyTotal)} 円
+                </Typography>
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{ borderRight: '1px solid #e0e0e0' }}
+              >
+                <Typography
+                  variant="h6"
+                  fontWeight="bold"
+                  color={APP_COLORS.mainGreen}
+                >
+                  {formatCurrency(monthlyIncome)} 円
+                </Typography>
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{ borderRight: '1px solid #e0e0e0' }}
+              >
+                <Typography variant="h6" fontWeight="bold" color="error.main">
+                  {formatCurrency(monthlyTotal)} 円
+                </Typography>
+              </TableCell>
+              <TableCell align="center">
+                <Typography
+                  variant="h6"
+                  fontWeight="bold"
+                  color={
+                    monthlyInvestment >= 0 ? APP_COLORS.mainGreen : 'error.main'
+                  }
+                >
+                  {formatCurrency(monthlyInvestment)} 円
+                </Typography>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </Paper>
 
       {/* メイングリッド */}
@@ -144,7 +333,9 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                   position: 'sticky',
                   left: 100,
                   zIndex: 20,
+                  width: 80,
                   minWidth: 80,
+                  maxWidth: 80,
                   borderRight: `2px solid ${APP_COLORS.background}`,
                 }}
               >
@@ -178,7 +369,9 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                           : isSat
                             ? APP_COLORS.saturday.text
                             : 'inherit',
-                      minWidth: 50,
+                      width: 80,
+                      minWidth: 80,
+                      maxWidth: 80,
                       fontWeight: isToday ? 'bold' : 'normal',
                       whiteSpace: 'nowrap',
                       borderBottom: isToday
@@ -195,6 +388,220 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
+            {/* 給料行 */}
+            <TableRow hover>
+              {/* カテゴリ名 */}
+              <TableCell
+                sx={{
+                  fontWeight: 'bold',
+                  bgcolor: '#f8f8f8',
+                  position: 'sticky',
+                  left: 0,
+                  zIndex: 10,
+                  borderRight: `2px solid ${APP_COLORS.background}`,
+                  fontSize: '0.8rem',
+                }}
+              >
+                給料
+              </TableCell>
+
+              {/* 給料合計 */}
+              <TableCell
+                align="right"
+                sx={{
+                  fontWeight: 'bold',
+                  bgcolor: '#f1f8f1',
+                  position: 'sticky',
+                  left: 100,
+                  zIndex: 10,
+                  width: 80,
+                  minWidth: 80,
+                  maxWidth: 80,
+                  borderRight: `2px solid ${APP_COLORS.background}`,
+                  fontSize: '0.75rem',
+                }}
+              >
+                {monthlyIncome > 0 ? formatCurrency(monthlyIncome) : '-'}
+              </TableCell>
+
+              {/* 各日のセル */}
+              {props.dates.map((date) => {
+                const dayIncome = getDayIncome(date);
+                const isToday = date === props.todayStr;
+                const dateObj = parseISO(date);
+                const isSun = isSunday(dateObj);
+                const isSat = isWeekend(dateObj) && !isSun;
+                const tooltipContent = formatIncomeTooltip(date);
+
+                const cellContent = (
+                  <TableCell
+                    key={date}
+                    align="right"
+                    onClick={() => props.onCellClick('SALARY', date)}
+                    sx={{
+                      bgcolor: isToday
+                        ? APP_COLORS.today.cell
+                        : isSun
+                          ? APP_COLORS.sunday.cell
+                          : isSat
+                            ? APP_COLORS.saturday.cell
+                            : 'white',
+                      border: '1px solid #f0f0f0',
+                      color: dayIncome > 0 ? 'inherit' : '#ccc',
+                      fontSize: '0.7rem',
+                      width: 80,
+                      minWidth: 80,
+                      maxWidth: 80,
+                      px: 0.5,
+                      cursor: 'pointer',
+                      '&:hover': {
+                        bgcolor: isToday
+                          ? APP_COLORS.today.cell
+                          : APP_COLORS.lightGray,
+                        opacity: 0.8,
+                      },
+                    }}
+                  >
+                    {dayIncome > 0 ? formatCurrency(dayIncome) : '-'}
+                  </TableCell>
+                );
+
+                return tooltipContent ? (
+                  <Tooltip
+                    key={date}
+                    title={
+                      <Box
+                        sx={{
+                          whiteSpace: 'pre-line',
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        {tooltipContent}
+                      </Box>
+                    }
+                    arrow
+                    placement="top"
+                  >
+                    {cellContent}
+                  </Tooltip>
+                ) : (
+                  cellContent
+                );
+              })}
+            </TableRow>
+
+            {/* 投資行 */}
+            <TableRow hover>
+              {/* カテゴリ名 */}
+              <TableCell
+                sx={{
+                  fontWeight: 'bold',
+                  bgcolor: '#f8f8f8',
+                  position: 'sticky',
+                  left: 0,
+                  zIndex: 10,
+                  borderRight: `2px solid ${APP_COLORS.background}`,
+                  borderBottom: '3px double #ccc',
+                  fontSize: '0.8rem',
+                }}
+              >
+                投資
+              </TableCell>
+
+              {/* 投資合計 */}
+              <TableCell
+                align="right"
+                sx={{
+                  fontWeight: 'bold',
+                  bgcolor: '#f1f8f1',
+                  position: 'sticky',
+                  left: 100,
+                  zIndex: 10,
+                  width: 80,
+                  minWidth: 80,
+                  maxWidth: 80,
+                  borderRight: `2px solid ${APP_COLORS.background}`,
+                  borderBottom: '3px double #ccc',
+                  fontSize: '0.75rem',
+                }}
+              >
+                {monthlyInvestment !== 0
+                  ? formatCurrency(monthlyInvestment)
+                  : '-'}
+              </TableCell>
+
+              {/* 各日のセル */}
+              {props.dates.map((date) => {
+                const dayInvestment = getDayInvestment(date);
+                const isToday = date === props.todayStr;
+                const dateObj = parseISO(date);
+                const isSun = isSunday(dateObj);
+                const isSat = isWeekend(dateObj) && !isSun;
+                const tooltipContent = formatInvestmentTooltip(date);
+
+                const cellContent = (
+                  <TableCell
+                    key={date}
+                    align="right"
+                    onClick={() => props.onCellClick('INVESTMENT', date)}
+                    sx={{
+                      bgcolor: isToday
+                        ? APP_COLORS.today.cell
+                        : isSun
+                          ? APP_COLORS.sunday.cell
+                          : isSat
+                            ? APP_COLORS.saturday.cell
+                            : 'white',
+                      border: '1px solid #f0f0f0',
+                      borderBottom: '3px double #ccc',
+                      color:
+                        dayInvestment !== 0
+                          ? dayInvestment > 0
+                            ? 'inherit'
+                            : 'error.main'
+                          : '#ccc',
+                      fontSize: '0.7rem',
+                      width: 80,
+                      minWidth: 80,
+                      maxWidth: 80,
+                      px: 0.5,
+                      cursor: 'pointer',
+                      '&:hover': {
+                        bgcolor: isToday
+                          ? APP_COLORS.today.cell
+                          : APP_COLORS.lightGray,
+                        opacity: 0.8,
+                      },
+                    }}
+                  >
+                    {dayInvestment !== 0 ? formatCurrency(dayInvestment) : '-'}
+                  </TableCell>
+                );
+
+                return tooltipContent ? (
+                  <Tooltip
+                    key={date}
+                    title={
+                      <Box
+                        sx={{
+                          whiteSpace: 'pre-line',
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        {tooltipContent}
+                      </Box>
+                    }
+                    arrow
+                    placement="top"
+                  >
+                    {cellContent}
+                  </Tooltip>
+                ) : (
+                  cellContent
+                );
+              })}
+            </TableRow>
+
             {props.categories.map((cat) => {
               const categoryTotal = getCategoryTotal(cat.category);
 
@@ -209,7 +616,6 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                       left: 0,
                       zIndex: 10,
                       borderRight: `2px solid ${APP_COLORS.background}`,
-                      boxShadow: '2px 0 4px rgba(0,0,0,0.05)',
                       fontSize: '0.8rem',
                     }}
                   >
@@ -225,8 +631,10 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                       position: 'sticky',
                       left: 100,
                       zIndex: 10,
+                      width: 80,
+                      minWidth: 80,
+                      maxWidth: 80,
                       borderRight: `2px solid ${APP_COLORS.background}`,
-                      boxShadow: '2px 0 4px rgba(0,0,0,0.05)',
                       fontSize: '0.75rem',
                     }}
                   >
@@ -247,11 +655,16 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                     const dateObj = parseISO(date);
                     const isSun = isSunday(dateObj);
                     const isSat = isWeekend(dateObj) && !isSun;
+                    const tooltipContent = formatExpenseTooltip(
+                      cat.category,
+                      date,
+                    );
 
-                    return (
+                    const cellContent = (
                       <TableCell
                         key={date}
                         align="right"
+                        onClick={() => props.onCellClick(cat.category, date)}
                         sx={{
                           bgcolor: isToday
                             ? APP_COLORS.today.cell
@@ -263,11 +676,43 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                           border: '1px solid #f0f0f0',
                           color: totalAmount > 0 ? 'inherit' : '#ccc',
                           fontSize: '0.7rem',
+                          width: 80,
+                          minWidth: 80,
+                          maxWidth: 80,
                           px: 0.5,
+                          cursor: 'pointer',
+                          '&:hover': {
+                            bgcolor: isToday
+                              ? APP_COLORS.today.cell
+                              : APP_COLORS.lightGray,
+                            opacity: 0.8,
+                          },
                         }}
                       >
                         {totalAmount > 0 ? formatCurrency(totalAmount) : '-'}
                       </TableCell>
+                    );
+
+                    return tooltipContent ? (
+                      <Tooltip
+                        key={date}
+                        title={
+                          <Box
+                            sx={{
+                              whiteSpace: 'pre-line',
+                              fontSize: '0.75rem',
+                            }}
+                          >
+                            {tooltipContent}
+                          </Box>
+                        }
+                        arrow
+                        placement="top"
+                      >
+                        {cellContent}
+                      </Tooltip>
+                    ) : (
+                      cellContent
                     );
                   })}
                 </TableRow>
@@ -329,6 +774,26 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* 支出入力ダイアログ */}
+      <ExpenseInputDialog
+        open={props.dialogOpen}
+        category={props.selectedCategory}
+        date={props.selectedDate}
+        existingExpenses={props.expenses}
+        existingIncomes={props.incomes}
+        existingInvestments={props.investments}
+        onClose={props.onDialogClose}
+        onAdd={props.onExpenseAdd}
+        onUpdate={props.onExpenseUpdate}
+        onDelete={props.onExpenseDelete}
+        onIncomeAdd={props.onIncomeAdd}
+        onIncomeUpdate={props.onIncomeUpdate}
+        onIncomeDelete={props.onIncomeDelete}
+        onInvestmentAdd={props.onInvestmentAdd}
+        onInvestmentUpdate={props.onInvestmentUpdate}
+        onInvestmentDelete={props.onInvestmentDelete}
+      />
     </Box>
   );
 };

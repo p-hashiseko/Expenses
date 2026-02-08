@@ -3,6 +3,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'; // 追加
 import { AuthProvider } from './presentation/state/AuthContext';
 import { AuthGuard } from './presentation/components/AuthGuard';
 import { LoginPage } from './presentation/pages/LoginPage';
+import { SignupPage } from './presentation/pages/SignupPage';
 import { DashboardPage } from './presentation/pages/DashboardPage';
 import { APP_COLORS } from './color.config'; // 追加
 
@@ -21,11 +22,14 @@ const theme = createTheme({
 
 function App() {
   return (
-    <ThemeProvider theme={theme}> {/* 全体を包む */}
+    <ThemeProvider theme={theme}>
+      {' '}
+      {/* 全体を包む */}
       <AuthProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
             <Route
               path="/"
               element={

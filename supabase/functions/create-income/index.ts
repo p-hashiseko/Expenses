@@ -7,7 +7,7 @@ serve(async () => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   )
 
-  // JST 기준で今日の日付
+  // JST 基準で今日の日付
   const now = new Date(Date.now() + 9 * 60 * 60 * 1000)
   const today = now.getDate()
   const year = now.getFullYear()
