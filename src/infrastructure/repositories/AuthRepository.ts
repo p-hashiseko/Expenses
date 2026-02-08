@@ -29,7 +29,31 @@ export const AuthRepository = {
   },
 
   async signOut(): Promise<void> {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw new Error(error.message);
+    try {
+      // セッションが存在する場合のみログアウトを試行
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        const { error } = await supabase.auth.signOut();
+        if (error && error.message !== 'Auth session missing!') {
+          throw new Error(error.message);
+        }
+      }
+
+      // セッションがない場合は単にローカルストレージをクリア
+      localStorage.removeItem('expenses-auth-token');
+    } catch (error: any) {
+      // ネットワークエラーの場合もローカルストレージをクリア
+      if (
+        error.message?.includes('fetch') ||
+        error.message?.includes('network')
+      ) {
+        localStorage.removeItem('expenses-auth-token');
+        return;
+      }
+      throw error;
+    }
   },
 };
