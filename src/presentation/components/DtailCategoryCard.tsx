@@ -1,12 +1,19 @@
 import { Check, Close, Edit } from '@mui/icons-material';
-import { Box, IconButton, InputAdornment, Stack, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 
 import React, { useState } from 'react';
 
 import { APP_COLORS } from '../../color.config';
 import type { Expense } from '../../domain/models/Expenses';
 import { ExpensesRepository } from '../../infrastructure/repositories/ExpensesRepository';
-import { formatCurrency, formatFullDateTime, sanitizeNumericInput } from '../../utils/formatters';
+import { formatCurrency, sanitizeNumericInput } from '../../utils/formatters';
 
 interface DetailCategoryCardProps {
   categoryName: string;
@@ -21,7 +28,7 @@ export const DetailCategoryCard: React.FC<DetailCategoryCardProps> = ({
   onRefresh,
   isHighlighted = false,
 }) => {
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [editMemo, setEditMemo] = useState('');
   const [editAmount, setEditAmount] = useState<string>(''); // 数値のみを文字列で保持
 
@@ -40,7 +47,7 @@ export const DetailCategoryCard: React.FC<DetailCategoryCardProps> = ({
   };
 
   // 保存処理
-  const handleSave = async (id: string) => {
+  const handleSave = async (id: number) => {
     // 保存前に sanitizeNumericInput で最終クリーニング
     const cleanedAmount = sanitizeNumericInput(editAmount);
     const numAmount = parseInt(cleanedAmount, 10);
@@ -97,11 +104,27 @@ export const DetailCategoryCard: React.FC<DetailCategoryCardProps> = ({
             mb: 1,
           }}
         >
-          <Typography sx={{ flex: 2, fontSize: '0.7rem', color: 'gray' }}>メモ</Typography>
-          <Typography sx={{ flex: 1, fontSize: '0.7rem', color: 'gray', textAlign: 'right' }}>
+          <Typography sx={{ flex: 2, fontSize: '0.7rem', color: 'gray' }}>
+            メモ
+          </Typography>
+          <Typography
+            sx={{
+              flex: 1,
+              fontSize: '0.7rem',
+              color: 'gray',
+              textAlign: 'right',
+            }}
+          >
             金額
           </Typography>
-          <Typography sx={{ flex: 2, fontSize: '0.7rem', color: 'gray', textAlign: 'right' }}>
+          <Typography
+            sx={{
+              flex: 2,
+              fontSize: '0.7rem',
+              color: 'gray',
+              textAlign: 'right',
+            }}
+          >
             記入時間
           </Typography>
           <Box sx={{ width: 70 }} />
@@ -114,7 +137,10 @@ export const DetailCategoryCard: React.FC<DetailCategoryCardProps> = ({
             const isEditing = editingId === item.id;
 
             return (
-              <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', minHeight: 40 }}>
+              <Box
+                key={item.id}
+                sx={{ display: 'flex', alignItems: 'center', minHeight: 40 }}
+              >
                 {isEditing ? (
                   <>
                     <TextField
@@ -122,7 +148,10 @@ export const DetailCategoryCard: React.FC<DetailCategoryCardProps> = ({
                       variant="standard"
                       value={editMemo}
                       onChange={(e) => setEditMemo(e.target.value)}
-                      sx={{ flex: 2, '& .MuiInput-input': { fontSize: '0.85rem' } }}
+                      sx={{
+                        flex: 2,
+                        '& .MuiInput-input': { fontSize: '0.85rem' },
+                      }}
                     />
                     <TextField
                       size="small"
@@ -137,7 +166,11 @@ export const DetailCategoryCard: React.FC<DetailCategoryCardProps> = ({
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
-                            <Typography sx={{ fontSize: '0.7rem', color: 'gray' }}>円</Typography>
+                            <Typography
+                              sx={{ fontSize: '0.7rem', color: 'gray' }}
+                            >
+                              円
+                            </Typography>
                           </InputAdornment>
                         ),
                       }}
@@ -151,7 +184,9 @@ export const DetailCategoryCard: React.FC<DetailCategoryCardProps> = ({
                       }}
                     />
                     <Box sx={{ flex: 1.8 }} />
-                    <Box sx={{ width: 70, textAlign: 'right', display: 'flex' }}>
+                    <Box
+                      sx={{ width: 70, textAlign: 'right', display: 'flex' }}
+                    >
                       <IconButton
                         size="small"
                         onClick={() => handleSave(item.id!)}
@@ -174,14 +209,24 @@ export const DetailCategoryCard: React.FC<DetailCategoryCardProps> = ({
                       {item.memo || '-'}
                     </Typography>
                     <Typography
-                      sx={{ flex: 1, fontSize: '0.85rem', textAlign: 'right', fontWeight: 'bold' }}
+                      sx={{
+                        flex: 1,
+                        fontSize: '0.85rem',
+                        textAlign: 'right',
+                        fontWeight: 'bold',
+                      }}
                     >
                       {formatCurrency(item.amount)}
                     </Typography>
                     <Typography
-                      sx={{ flex: 2, fontSize: '0.7rem', textAlign: 'right', color: 'gray' }}
+                      sx={{
+                        flex: 2,
+                        fontSize: '0.7rem',
+                        textAlign: 'right',
+                        color: 'gray',
+                      }}
                     >
-                      {item.createdAt ? formatFullDateTime(item.createdAt) : '-'}
+                      {item.payment_date || '-'}
                     </Typography>
                     <Box sx={{ width: 70, textAlign: 'right' }}>
                       <IconButton

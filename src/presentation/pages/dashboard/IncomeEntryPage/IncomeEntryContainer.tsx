@@ -34,7 +34,7 @@ export const IncomeEntryContainer: React.FC = () => {
         userId: user.id,
         amount: parseInt(amount),
         memo: memo,
-        income_day: new Date(incomeDate),
+        income_day: incomeDate,
       };
 
       await IncomeRepository.saveIncome(incomeData);

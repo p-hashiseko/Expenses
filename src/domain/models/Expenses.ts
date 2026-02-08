@@ -14,3 +14,5 @@ export interface ExpenseOutput {
   memo: string | null;
   payment_date: string;
 }
+
+export type Expense = ExpenseOutput;

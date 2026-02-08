@@ -105,16 +105,12 @@ export const ExpensesRepository = {
    * 更新: 特定の支出レコードを更新
    */
   async updateExpense(
-    id: number,
-    amount: number,
-    memo: string | null,
+    id: number | string,
+    updates: { memo?: string | null; amount?: number },
   ): Promise<void> {
     const { error } = await supabase
       .from('expenses')
-      .update({
-        amount,
-        memo,
-      })
+      .update(updates)
       .eq('id', id);
 
     if (error) throw error;

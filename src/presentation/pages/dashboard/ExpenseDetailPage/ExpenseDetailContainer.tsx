@@ -176,7 +176,10 @@ export const ExpenseDetailContainer: React.FC = () => {
     memo: string,
   ) => {
     try {
-      await ExpensesRepository.updateExpense(id, amount, memo || null);
+      await ExpensesRepository.updateExpense(id, {
+        amount,
+        memo: memo || null,
+      });
 
       // データを再取得
       await fetchData();

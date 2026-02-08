@@ -47,8 +47,13 @@ type Props = {
   onIncomeAdd: (amount: number, memo: string) => void;
   onIncomeUpdate: (id: number, amount: number, memo: string) => void;
   onIncomeDelete: (id: number) => void;
-  onInvestmentAdd: (amount: number, memo: string) => void;
-  onInvestmentUpdate: (id: number, amount: number, memo: string) => void;
+  onInvestmentAdd: (amount: number, memo: string, flow: 'in' | 'out') => void;
+  onInvestmentUpdate: (
+    id: number,
+    amount: number,
+    memo: string,
+    flow: 'in' | 'out',
+  ) => void;
   onInvestmentDelete: (id: number) => void;
 };
 

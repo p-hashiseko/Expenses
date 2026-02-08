@@ -4,8 +4,6 @@ import { useAuth } from '../../../../state/AuthContext';
 import { sanitizeNumericInput } from '../../../../../utils/formatters';
 import { InitialBalanceSettingPresenter } from './InitialBalanceSettingPresenter';
 
-const INITIAL_BALANCE_MEMO = '初期所持金';
-
 interface InitialBalanceSettingContainerProps {
   onBack: () => void;
 }
