@@ -95,7 +95,8 @@ export const LoginPage: React.FC = () => {
           sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
         >
           <TextField
-            label="ユーザー名"
+            label="メールアドレス"
+            type="email"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -129,7 +130,7 @@ export const LoginPage: React.FC = () => {
             }
             label={
               <Typography variant="body2" color="text.secondary">
-                ユーザー名を記憶する
+                メールアドレスを記憶する
               </Typography>
             }
           />

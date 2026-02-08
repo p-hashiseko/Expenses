@@ -14,7 +14,6 @@ import { AuthRepository } from '../../infrastructure/repositories/AuthRepository
 
 export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -26,16 +25,6 @@ export const SignupPage: React.FC = () => {
     setError('');
 
     // バリデーション
-    if (!username.trim()) {
-      setError('ユーザー名を入力してください');
-      return;
-    }
-
-    if (username.length < 3) {
-      setError('ユーザー名は3文字以上で入力してください');
-      return;
-    }
-
     if (!email.trim()) {
       setError('メールアドレスを入力してください');
       return;
@@ -59,7 +48,7 @@ export const SignupPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await AuthRepository.signUp(username, email, password);
+      await AuthRepository.signUp(email, password);
       alert('アカウントが作成されました。ログインしてください。');
       navigate('/login');
     } catch (err: any) {
@@ -111,16 +100,6 @@ export const SignupPage: React.FC = () => {
           onSubmit={handleSignup}
           sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
         >
-          <TextField
-            label="ユーザー名"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            fullWidth
-            disabled={isLoading}
-            helperText="3文字以上"
-          />
-
           <TextField
             label="メールアドレス"
             type="email"

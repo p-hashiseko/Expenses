@@ -26,7 +26,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(
         session?.user
-          ? { id: session.user.id, email: session.user.email }
+          ? {
+              id: session.user.id,
+              email: session.user.email,
+            }
           : null,
       );
       setLoading(false);
@@ -37,7 +40,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(
         session?.user
-          ? { id: session.user.id, email: session.user.email }
+          ? {
+              id: session.user.id,
+              email: session.user.email,
+            }
           : null,
       );
       setLoading(false);
@@ -48,7 +54,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // ★ AuthRepository を呼び出す関数を定義
   const signOut = async () => {
-    await AuthRepository.signOut();
+    try {
+      await AuthRepository.signOut();
+      // ログアウト後、状態をクリア
+      setUser(null);
+    } catch (error) {
+      console.error('SignOut error:', error);
+      throw error;
+    }
   };
 
   return (

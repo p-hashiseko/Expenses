@@ -1,16 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Box,
-  Chip,
-  Skeleton,
-} from '@mui/material';
+import React from 'react';
+import { AppBar, Toolbar, Typography, Box, Chip } from '@mui/material';
 import { AccountCircle } from '@mui/icons-material';
 import { useAuth } from '../state/AuthContext';
 import { APP_COLORS } from '../../color.config';
-import { ProfileRepository } from '../../infrastructure/repositories/ProfileRepository';
 
 interface HeaderProps {
   onUserNameClick?: () => void;
@@ -18,25 +10,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
   const { user } = useAuth();
-  const [username, setUsername] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
-      try {
-        const profile = await ProfileRepository.getProfile(user.id);
-        setUsername(profile?.username || 'ゲスト');
-      } catch (err) {
-        console.error('Profile fetch error:', err);
-        setUsername('ユーザー');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [user]);
 
   return (
     <AppBar
@@ -62,33 +35,24 @@ export const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {loading ? (
-            <Skeleton
-              variant="rounded"
-              width={80}
-              height={32}
-              sx={{ borderRadius: '16px' }}
-            />
-          ) : (
-            <Chip
-              icon={<AccountCircle style={{ color: APP_COLORS.mainGreen }} />}
-              label={username}
-              variant="outlined"
-              onClick={onUserNameClick}
-              sx={{
-                borderColor: APP_COLORS.lightGray,
-                color: APP_COLORS.textPrimary,
-                fontWeight: '600',
-                px: 1,
-                cursor: onUserNameClick ? 'pointer' : 'default',
-                '&:hover': onUserNameClick
-                  ? {
-                      bgcolor: 'rgba(0, 0, 0, 0.04)',
-                    }
-                  : {},
-              }}
-            />
-          )}
+          <Chip
+            icon={<AccountCircle style={{ color: APP_COLORS.mainGreen }} />}
+            label={user?.email?.split('@')[0] || 'ゲスト'}
+            variant="outlined"
+            onClick={onUserNameClick}
+            sx={{
+              borderColor: APP_COLORS.lightGray,
+              color: APP_COLORS.textPrimary,
+              fontWeight: '600',
+              px: 1,
+              cursor: onUserNameClick ? 'pointer' : 'default',
+              '&:hover': onUserNameClick
+                ? {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)',
+                  }
+                : {},
+            }}
+          />
         </Box>
       </Toolbar>
     </AppBar>
