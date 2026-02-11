@@ -11,6 +11,15 @@ import { APP_COLORS } from './color.config';
 
 // MUIのカスタムテーマ作成
 const theme = createTheme({
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600, // モバイル/PC の境界を600pxに設定
+      md: 960,
+      lg: 1280,
+      xl: 1920,
+    },
+  },
   palette: {
     primary: {
       main: APP_COLORS.mainGreen,
@@ -30,6 +39,26 @@ const theme = createTheme({
           borderRadius: 8,
           // PC・スマホ両方で違和感のないパディングに調整
           padding: '8px 16px',
+        },
+      },
+    },
+    MuiCssBaseline: {
+      styleOverrides: {
+        // モバイルでテキスト選択を防ぐ（PC版は影響なし）
+        '@media (max-width: 600px)': {
+          '*': {
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            MozUserSelect: 'none',
+            msUserSelect: 'none',
+          },
+          // 入力フィールドは選択可能にする
+          'input, textarea': {
+            userSelect: 'text',
+            WebkitUserSelect: 'text',
+            MozUserSelect: 'text',
+            msUserSelect: 'text',
+          },
         },
       },
     },

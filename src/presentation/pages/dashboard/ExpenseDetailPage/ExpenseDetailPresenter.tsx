@@ -185,15 +185,24 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
   };
 
   return (
-    <Box sx={{ p: 1, display: 'flex', flexDirection: 'column' }}>
+    <Box
+      sx={{ p: { xs: 0.5, sm: 1 }, display: 'flex', flexDirection: 'column' }}
+    >
       {/* ヘッダー: 年月選択 */}
-      <Paper sx={{ mb: 2, borderRadius: 2 }} elevation={0}>
+      <Paper sx={{ mb: { xs: 1, sm: 2 }, borderRadius: 2 }} elevation={0}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs
             value={props.years.indexOf(props.selectedYear)}
             onChange={(_, index) => props.onYearChange(props.years[index])}
             variant="scrollable"
             scrollButtons="auto"
+            sx={{
+              '& .MuiTab-root': {
+                fontSize: { xs: '0.85rem', sm: '0.875rem' }, // モバイルでフォントサイズ調整
+                minHeight: { xs: 42, sm: 48 }, // モバイルで高さ調整
+                py: { xs: 1, sm: 1.5 },
+              },
+            }}
           >
             {props.years.map((y) => (
               <Tab key={y} label={`${y}年`} />
@@ -206,6 +215,13 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
             onChange={(_, val) => props.onMonthChange(val + 1)}
             variant="scrollable"
             scrollButtons="auto"
+            sx={{
+              '& .MuiTab-root': {
+                fontSize: { xs: '0.85rem', sm: '0.875rem' }, // モバイルでフォントサイズ調整
+                minHeight: { xs: 42, sm: 48 }, // モバイルで高さ調整
+                py: { xs: 1, sm: 1.5 },
+              },
+            }}
           >
             {props.months.map((m) => (
               <Tab key={m} label={`${m}月`} />
@@ -215,9 +231,18 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
       </Paper>
 
       {/* 月間合計表示 */}
-      <Paper sx={{ mb: 2, borderRadius: 2 }} variant="outlined" elevation={0}>
-        <Box sx={{ p: 2, pb: 0 }}>
-          <Typography variant="h6" fontWeight="bold" color="text.primary">
+      <Paper
+        sx={{ mb: { xs: 1, sm: 2 }, borderRadius: 2 }}
+        variant="outlined"
+        elevation={0}
+      >
+        <Box sx={{ p: { xs: 1.5, sm: 2 }, pb: 0 }}>
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            color="text.primary"
+            sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }} // モバイルでフォントサイズ調整
+          >
             {props.selectedYear}年{props.selectedMonth}月の合計
           </Typography>
         </Box>
@@ -226,23 +251,45 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
             <TableRow>
               <TableCell
                 align="center"
-                sx={{ fontWeight: 'bold', borderRight: '1px solid #e0e0e0' }}
+                sx={{
+                  fontWeight: 'bold',
+                  borderRight: '1px solid #e0e0e0',
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' }, // モバイルでフォントサイズ調整
+                  px: { xs: 0.5, sm: 1 },
+                }}
               >
                 収支
               </TableCell>
               <TableCell
                 align="center"
-                sx={{ fontWeight: 'bold', borderRight: '1px solid #e0e0e0' }}
+                sx={{
+                  fontWeight: 'bold',
+                  borderRight: '1px solid #e0e0e0',
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  px: { xs: 0.5, sm: 1 },
+                }}
               >
                 収入
               </TableCell>
               <TableCell
                 align="center"
-                sx={{ fontWeight: 'bold', borderRight: '1px solid #e0e0e0' }}
+                sx={{
+                  fontWeight: 'bold',
+                  borderRight: '1px solid #e0e0e0',
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  px: { xs: 0.5, sm: 1 },
+                }}
               >
                 支出
               </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 'bold' }}>
+              <TableCell
+                align="center"
+                sx={{
+                  fontWeight: 'bold',
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  px: { xs: 0.5, sm: 1 },
+                }}
+              >
                 投資額
               </TableCell>
             </TableRow>
@@ -251,11 +298,15 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
             <TableRow>
               <TableCell
                 align="center"
-                sx={{ borderRight: '1px solid #e0e0e0' }}
+                sx={{
+                  borderRight: '1px solid #e0e0e0',
+                  px: { xs: 0.5, sm: 1 },
+                }}
               >
                 <Typography
                   variant="h6"
                   fontWeight="bold"
+                  sx={{ fontSize: { xs: '0.95rem', sm: '1.25rem' } }} // モバイルでフォントサイズ調整
                   color={
                     monthlyIncome - monthlyTotal >= 0
                       ? APP_COLORS.mainGreen
@@ -267,11 +318,15 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
               </TableCell>
               <TableCell
                 align="center"
-                sx={{ borderRight: '1px solid #e0e0e0' }}
+                sx={{
+                  borderRight: '1px solid #e0e0e0',
+                  px: { xs: 0.5, sm: 1 },
+                }}
               >
                 <Typography
                   variant="h6"
                   fontWeight="bold"
+                  sx={{ fontSize: { xs: '0.95rem', sm: '1.25rem' } }}
                   color={APP_COLORS.mainGreen}
                 >
                   {formatCurrency(monthlyIncome)} 円
@@ -279,16 +334,25 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
               </TableCell>
               <TableCell
                 align="center"
-                sx={{ borderRight: '1px solid #e0e0e0' }}
+                sx={{
+                  borderRight: '1px solid #e0e0e0',
+                  px: { xs: 0.5, sm: 1 },
+                }}
               >
-                <Typography variant="h6" fontWeight="bold" color="error.main">
-                  {formatCurrency(monthlyTotal)} 円
-                </Typography>
-              </TableCell>
-              <TableCell align="center">
                 <Typography
                   variant="h6"
                   fontWeight="bold"
+                  sx={{ fontSize: { xs: '0.95rem', sm: '1.25rem' } }}
+                  color="error.main"
+                >
+                  {formatCurrency(monthlyTotal)} 円
+                </Typography>
+              </TableCell>
+              <TableCell align="center" sx={{ px: { xs: 0.5, sm: 1 } }}>
+                <Typography
+                  variant="h6"
+                  fontWeight="bold"
+                  sx={{ fontSize: { xs: '0.95rem', sm: '1.25rem' } }}
                   color={
                     monthlyInvestment >= 0 ? APP_COLORS.mainGreen : 'error.main'
                   }
@@ -321,8 +385,10 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                   position: 'sticky',
                   left: 0,
                   zIndex: 20,
-                  minWidth: 100,
+                  minWidth: { xs: 80, sm: 100 }, // モバイルで幅調整
                   borderRight: `2px solid ${APP_COLORS.background}`,
+                  fontSize: { xs: '0.7rem', sm: '0.875rem' }, // モバイルでフォントサイズ調整
+                  px: { xs: 0.5, sm: 1 },
                 }}
               >
                 カテゴリ
@@ -336,12 +402,14 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                   color: 'white',
                   fontWeight: 'bold',
                   position: 'sticky',
-                  left: 100,
+                  left: { xs: 80, sm: 100 }, // モバイルで位置調整
                   zIndex: 20,
-                  width: 80,
-                  minWidth: 80,
-                  maxWidth: 80,
+                  width: { xs: 70, sm: 80 }, // モバイルで幅調整
+                  minWidth: { xs: 70, sm: 80 },
+                  maxWidth: { xs: 70, sm: 80 },
                   borderRight: `2px solid ${APP_COLORS.background}`,
+                  fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                  px: { xs: 0.5, sm: 1 },
                 }}
               >
                 合計
@@ -374,19 +442,23 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                           : isSat
                             ? APP_COLORS.saturday.text
                             : 'inherit',
-                      width: 80,
-                      minWidth: 80,
-                      maxWidth: 80,
+                      width: { xs: 70, sm: 80 }, // モバイルで幅調整
+                      minWidth: { xs: 70, sm: 80 },
+                      maxWidth: { xs: 70, sm: 80 },
                       fontWeight: isToday ? 'bold' : 'normal',
                       whiteSpace: 'nowrap',
                       borderBottom: isToday
                         ? `2px solid ${APP_COLORS.today.border}`
                         : 'none',
-                      px: 0.5,
+                      px: { xs: 0.3, sm: 0.5 }, // モバイルでパディング調整
                     }}
                   >
-                    <Box sx={{ fontSize: '0.75rem' }}>{day}</Box>
-                    <Box sx={{ fontSize: '0.6rem' }}>{weekday}</Box>
+                    <Box sx={{ fontSize: { xs: '0.65rem', sm: '0.75rem' } }}>
+                      {day}
+                    </Box>
+                    <Box sx={{ fontSize: { xs: '0.55rem', sm: '0.6rem' } }}>
+                      {weekday}
+                    </Box>
                   </TableCell>
                 );
               })}
@@ -404,7 +476,8 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                   left: 0,
                   zIndex: 10,
                   borderRight: `2px solid ${APP_COLORS.background}`,
-                  fontSize: '0.8rem',
+                  fontSize: { xs: '0.7rem', sm: '0.8rem' }, // モバイルでフォントサイズ調整
+                  px: { xs: 0.5, sm: 1 },
                 }}
               >
                 給料
@@ -417,13 +490,14 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                   fontWeight: 'bold',
                   bgcolor: '#f1f8f1',
                   position: 'sticky',
-                  left: 100,
+                  left: { xs: 80, sm: 100 }, // モバイルで位置調整
                   zIndex: 10,
-                  width: 80,
-                  minWidth: 80,
-                  maxWidth: 80,
+                  width: { xs: 70, sm: 80 },
+                  minWidth: { xs: 70, sm: 80 },
+                  maxWidth: { xs: 70, sm: 80 },
                   borderRight: `2px solid ${APP_COLORS.background}`,
-                  fontSize: '0.75rem',
+                  fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                  px: { xs: 0.3, sm: 0.5 },
                 }}
               >
                 {monthlyIncome > 0 ? formatCurrency(monthlyIncome) : '-'}
@@ -453,11 +527,11 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                             : 'white',
                       border: '1px solid #f0f0f0',
                       color: dayIncome > 0 ? 'inherit' : '#ccc',
-                      fontSize: '0.7rem',
-                      width: 80,
-                      minWidth: 80,
-                      maxWidth: 80,
-                      px: 0.5,
+                      fontSize: { xs: '0.6rem', sm: '0.7rem' }, // モバイルでフォントサイズ調整
+                      width: { xs: 70, sm: 80 },
+                      minWidth: { xs: 70, sm: 80 },
+                      maxWidth: { xs: 70, sm: 80 },
+                      px: { xs: 0.3, sm: 0.5 },
                       cursor: 'pointer',
                       '&:hover': {
                         bgcolor: isToday
@@ -507,7 +581,8 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                   zIndex: 10,
                   borderRight: `2px solid ${APP_COLORS.background}`,
                   borderBottom: '3px double #ccc',
-                  fontSize: '0.8rem',
+                  fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                  px: { xs: 0.5, sm: 1 },
                 }}
               >
                 投資
@@ -520,14 +595,15 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                   fontWeight: 'bold',
                   bgcolor: '#f1f8f1',
                   position: 'sticky',
-                  left: 100,
+                  left: { xs: 80, sm: 100 },
                   zIndex: 10,
-                  width: 80,
-                  minWidth: 80,
-                  maxWidth: 80,
+                  width: { xs: 70, sm: 80 },
+                  minWidth: { xs: 70, sm: 80 },
+                  maxWidth: { xs: 70, sm: 80 },
                   borderRight: `2px solid ${APP_COLORS.background}`,
                   borderBottom: '3px double #ccc',
-                  fontSize: '0.75rem',
+                  fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                  px: { xs: 0.3, sm: 0.5 },
                 }}
               >
                 {monthlyInvestment !== 0
@@ -565,11 +641,11 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                             ? 'inherit'
                             : 'error.main'
                           : '#ccc',
-                      fontSize: '0.7rem',
-                      width: 80,
-                      minWidth: 80,
-                      maxWidth: 80,
-                      px: 0.5,
+                      fontSize: { xs: '0.6rem', sm: '0.7rem' },
+                      width: { xs: 70, sm: 80 },
+                      minWidth: { xs: 70, sm: 80 },
+                      maxWidth: { xs: 70, sm: 80 },
+                      px: { xs: 0.3, sm: 0.5 },
                       cursor: 'pointer',
                       '&:hover': {
                         bgcolor: isToday
@@ -621,7 +697,8 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                       left: 0,
                       zIndex: 10,
                       borderRight: `2px solid ${APP_COLORS.background}`,
-                      fontSize: '0.8rem',
+                      fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                      px: { xs: 0.5, sm: 1 },
                     }}
                   >
                     {CATEGORY[cat.category] || cat.category}
@@ -634,13 +711,14 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                       fontWeight: 'bold',
                       bgcolor: '#f1f8f1',
                       position: 'sticky',
-                      left: 100,
+                      left: { xs: 80, sm: 100 },
                       zIndex: 10,
-                      width: 80,
-                      minWidth: 80,
-                      maxWidth: 80,
+                      width: { xs: 70, sm: 80 },
+                      minWidth: { xs: 70, sm: 80 },
+                      maxWidth: { xs: 70, sm: 80 },
                       borderRight: `2px solid ${APP_COLORS.background}`,
-                      fontSize: '0.75rem',
+                      fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                      px: { xs: 0.3, sm: 0.5 },
                     }}
                   >
                     {categoryTotal > 0 ? formatCurrency(categoryTotal) : '-'}
@@ -680,11 +758,11 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                                 : 'white',
                           border: '1px solid #f0f0f0',
                           color: totalAmount > 0 ? 'inherit' : '#ccc',
-                          fontSize: '0.7rem',
-                          width: 80,
-                          minWidth: 80,
-                          maxWidth: 80,
-                          px: 0.5,
+                          fontSize: { xs: '0.6rem', sm: '0.7rem' },
+                          width: { xs: 70, sm: 80 },
+                          minWidth: { xs: 70, sm: 80 },
+                          maxWidth: { xs: 70, sm: 80 },
+                          px: { xs: 0.3, sm: 0.5 },
                           cursor: 'pointer',
                           '&:hover': {
                             bgcolor: isToday
@@ -735,6 +813,8 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                   bgcolor: APP_COLORS.mainGreen,
                   color: 'white',
                   borderRight: `2px solid ${APP_COLORS.background}`,
+                  fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                  px: { xs: 0.5, sm: 1 },
                 }}
               >
                 日計
@@ -744,12 +824,13 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                 sx={{
                   fontWeight: 'bold',
                   position: 'sticky',
-                  left: 100,
+                  left: { xs: 80, sm: 100 },
                   zIndex: 10,
                   bgcolor: APP_COLORS.mainGreen,
                   color: 'white',
                   borderRight: `2px solid ${APP_COLORS.background}`,
-                  fontSize: '0.75rem',
+                  fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                  px: { xs: 0.3, sm: 0.5 },
                 }}
               >
                 {formatCurrency(monthlyTotal)}
@@ -767,8 +848,8 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                       bgcolor: isToday ? APP_COLORS.today.cell : '#fafafa',
                       border: '1px solid #e0e0e0',
                       color: dayTotal > 0 ? APP_COLORS.mainGreen : '#ccc',
-                      fontSize: '0.7rem',
-                      px: 0.5,
+                      fontSize: { xs: '0.6rem', sm: '0.7rem' },
+                      px: { xs: 0.3, sm: 0.5 },
                     }}
                   >
                     {dayTotal > 0 ? formatCurrency(dayTotal) : '-'}

@@ -31,7 +31,8 @@ export const PrimaryActionButton: React.FC<Props> = ({
       fontWeight: 'bold',
       boxShadow: 'none',
       borderRadius: 4,
-      height: 56,
+      height: { xs: 48, sm: 56 }, // モバイルは48px、PCは56px
+      fontSize: { xs: '0.9rem', sm: '1rem' }, // モバイルでフォントサイズ調整
       '& svg': {
         color: 'inherit',
       },

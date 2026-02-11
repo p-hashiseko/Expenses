@@ -67,8 +67,8 @@ export const DashboardPage: React.FC = () => {
         maxWidth="lg"
         sx={{
           flex: 1,
-          py: 3,
-          pb: 12, // BottomNavigation 分の余白
+          py: { xs: 2, sm: 3 }, // モバイルでパディング調整
+          pb: { xs: 10, sm: 12 }, // BottomNavigation 分の余白
           color: APP_COLORS.textPrimary,
         }}
       >
@@ -83,7 +83,7 @@ export const DashboardPage: React.FC = () => {
           left: 0,
           right: 0,
           zIndex: 1000,
-          borderRadius: '16px 16px 0 0',
+          borderRadius: { xs: '12px 12px 0 0', sm: '16px 16px 0 0' }, // モバイルで角丸調整
         }}
       >
         <BottomNavigation
@@ -91,12 +91,18 @@ export const DashboardPage: React.FC = () => {
           value={activeTab}
           onChange={handleTabChange}
           sx={{
-            height: 70,
+            height: { xs: 60, sm: 70 }, // モバイルで高さ調整
             '& .Mui-selected': {
               '& .MuiBottomNavigationAction-label, & .MuiSvgIcon-root': {
                 color: `${APP_COLORS.mainGreen} !important`,
                 fontWeight: 'bold',
               },
+            },
+            '& .MuiBottomNavigationAction-label': {
+              fontSize: { xs: '0.7rem', sm: '0.75rem' }, // モバイルでフォントサイズ調整
+            },
+            '& .MuiSvgIcon-root': {
+              fontSize: { xs: '1.3rem', sm: '1.5rem' }, // モバイルでアイコンサイズ調整
             },
           }}
         >
