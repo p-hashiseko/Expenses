@@ -26,7 +26,8 @@ export const SecondaryAddButton: React.FC<Props> = ({
       color: APP_COLORS.textPrimary,
       fontWeight: 'bold',
       borderRadius: 3, // 少し角を丸く
-      height: 52, // 少しだけスリムに
+      height: { xs: 44, sm: 52 }, // モバイルは44px、PCは52px
+      fontSize: { xs: '0.85rem', sm: '1rem' }, // モバイルでフォントサイズ調整
       bgcolor: 'transparent',
       textTransform: 'none', // 文字を勝手に大文字にしない
       '&:hover': {

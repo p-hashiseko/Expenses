@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
         color: APP_COLORS.textPrimary,
       }}
     >
-      <Toolbar>
+      <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }}>
         <Typography
           variant="h6"
           component="div"
@@ -29,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
             flexGrow: 1,
             fontWeight: 'bold',
             color: APP_COLORS.mainGreen,
+            fontSize: { xs: '1.1rem', sm: '1.25rem' }, // モバイルでフォントサイズ調整
           }}
         >
           家計簿アプリ
@@ -44,7 +45,8 @@ export const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
               borderColor: APP_COLORS.lightGray,
               color: APP_COLORS.textPrimary,
               fontWeight: '600',
-              px: 1,
+              px: { xs: 0.5, sm: 1 }, // モバイルでパディング調整
+              fontSize: { xs: '0.8rem', sm: '0.875rem' }, // モバイルでフォントサイズ調整
               cursor: onUserNameClick ? 'pointer' : 'default',
               '&:hover': onUserNameClick
                 ? {
