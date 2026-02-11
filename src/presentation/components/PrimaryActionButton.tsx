@@ -31,7 +31,8 @@ export const PrimaryActionButton: React.FC<Props> = ({
       fontWeight: 'bold',
       boxShadow: 'none',
       borderRadius: 4,
-      height: 56,
+      height: { xs: 48, sm: 56 },
+      fontSize: { xs: '0.875rem', sm: '1rem' },
       '& svg': {
         color: 'inherit',
       },

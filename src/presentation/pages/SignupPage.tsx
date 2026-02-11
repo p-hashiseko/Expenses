@@ -74,8 +74,9 @@ export const SignupPage: React.FC = () => {
         sx={{
           width: '100%',
           maxWidth: 400,
-          p: 4,
+          p: { xs: 2, sm: 4 },
           borderRadius: 2,
+          mx: { xs: 2, sm: 0 },
         }}
       >
         <Typography
@@ -85,6 +86,7 @@ export const SignupPage: React.FC = () => {
           mb={3}
           textAlign="center"
           color={APP_COLORS.mainGreen}
+          sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
         >
           アカウント作成
         </Typography>
@@ -108,6 +110,11 @@ export const SignupPage: React.FC = () => {
             required
             fullWidth
             disabled={isLoading}
+            sx={{
+              '& .MuiInputBase-input': {
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+              },
+            }}
           />
 
           <TextField
@@ -119,6 +126,11 @@ export const SignupPage: React.FC = () => {
             fullWidth
             disabled={isLoading}
             helperText="6文字以上"
+            sx={{
+              '& .MuiInputBase-input': {
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+              },
+            }}
           />
 
           <TextField
@@ -129,6 +141,11 @@ export const SignupPage: React.FC = () => {
             required
             fullWidth
             disabled={isLoading}
+            sx={{
+              '& .MuiInputBase-input': {
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+              },
+            }}
           />
 
           <Button
@@ -140,7 +157,8 @@ export const SignupPage: React.FC = () => {
               mt: 2,
               bgcolor: APP_COLORS.mainGreen,
               color: 'white',
-              py: 1.5,
+              py: { xs: 1.2, sm: 1.5 },
+              fontSize: { xs: '0.875rem', sm: '1rem' },
               '&:hover': {
                 bgcolor: APP_COLORS.darkGreen,
               },

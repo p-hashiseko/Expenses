@@ -67,8 +67,9 @@ export const DashboardPage: React.FC = () => {
         maxWidth="lg"
         sx={{
           flex: 1,
-          py: 3,
-          pb: 12, // BottomNavigation 分の余白
+          py: { xs: 2, sm: 3 },
+          pb: { xs: 10, sm: 12 }, // BottomNavigation 分の余白
+          px: { xs: 1, sm: 3 },
           color: APP_COLORS.textPrimary,
         }}
       >
@@ -91,7 +92,13 @@ export const DashboardPage: React.FC = () => {
           value={activeTab}
           onChange={handleTabChange}
           sx={{
-            height: 70,
+            height: { xs: 60, sm: 70 },
+            '& .MuiBottomNavigationAction-label': {
+              fontSize: { xs: '0.65rem', sm: '0.75rem' },
+            },
+            '& .MuiSvgIcon-root': {
+              fontSize: { xs: '1.25rem', sm: '1.5rem' },
+            },
             '& .Mui-selected': {
               '& .MuiBottomNavigationAction-label, & .MuiSvgIcon-root': {
                 color: `${APP_COLORS.mainGreen} !important`,

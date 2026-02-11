@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
         color: APP_COLORS.textPrimary,
       }}
     >
-      <Toolbar>
+      <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }}>
         <Typography
           variant="h6"
           component="div"
@@ -29,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
             flexGrow: 1,
             fontWeight: 'bold',
             color: APP_COLORS.mainGreen,
+            fontSize: { xs: '1rem', sm: '1.25rem' },
           }}
         >
           家計簿アプリ
@@ -46,6 +47,14 @@ export const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
               fontWeight: '600',
               px: 1,
               cursor: onUserNameClick ? 'pointer' : 'default',
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              height: { xs: 28, sm: 32 },
+              '& .MuiChip-label': {
+                px: { xs: 0.5, sm: 1 },
+              },
+              '& .MuiChip-icon': {
+                fontSize: { xs: '1rem', sm: '1.25rem' },
+              },
               '&:hover': onUserNameClick
                 ? {
                     bgcolor: 'rgba(0, 0, 0, 0.04)',
