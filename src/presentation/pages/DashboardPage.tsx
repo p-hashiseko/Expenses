@@ -84,7 +84,7 @@ export const DashboardPage: React.FC = () => {
           left: 0,
           right: 0,
           zIndex: 1000,
-          borderRadius: '16px 16px 0 0',
+          borderRadius: { xs: '12px 12px 0 0', sm: '16px 16px 0 0' }, // モバイルで角丸調整
         }}
       >
         <BottomNavigation
@@ -104,6 +104,12 @@ export const DashboardPage: React.FC = () => {
                 color: `${APP_COLORS.mainGreen} !important`,
                 fontWeight: 'bold',
               },
+            },
+            '& .MuiBottomNavigationAction-label': {
+              fontSize: { xs: '0.7rem', sm: '0.75rem' }, // モバイルでフォントサイズ調整
+            },
+            '& .MuiSvgIcon-root': {
+              fontSize: { xs: '1.3rem', sm: '1.5rem' }, // モバイルでアイコンサイズ調整
             },
           }}
         >

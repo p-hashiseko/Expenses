@@ -131,6 +131,7 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
         fontWeight: 'bold',
         color: APP_COLORS.textPrimary,
         opacity: 0.7,
+        fontSize: { xs: '0.7rem', sm: '0.75rem' },
       }}
     >
       {children}
@@ -142,11 +143,11 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
     <Paper
       elevation={0}
       sx={{
-        borderRadius: 3,
+        borderRadius: { xs: 2, sm: 3 },
         border: `1px solid ${APP_COLORS.lightGray}`,
         overflow: 'hidden',
         bgcolor: APP_COLORS.white,
-        mb: 3,
+        mb: { xs: 2, sm: 3 },
       }}
     >
       <List disablePadding>{children}</List>
@@ -154,10 +155,22 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
   );
 
   return (
-    <Box sx={{ p: 1, bgcolor: APP_COLORS.background, minHeight: '100%' }}>
+    <Box
+      sx={{
+        p: { xs: 0.5, sm: 1 },
+        bgcolor: APP_COLORS.background,
+        minHeight: '100%',
+      }}
+    >
       <Typography
         variant="h6"
-        sx={{ mb: 2, pl: 1, fontWeight: 'bold', color: APP_COLORS.textPrimary }}
+        sx={{
+          mb: { xs: 1.5, sm: 2 },
+          pl: 1,
+          fontWeight: 'bold',
+          color: APP_COLORS.textPrimary,
+          fontSize: { xs: '1.1rem', sm: '1.25rem' },
+        }}
       >
         設定
       </Typography>
@@ -167,8 +180,16 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
         {configItems.map((item, index) => (
           <React.Fragment key={item.id}>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => setCurrentView(item.id)}>
-                <ListItemIcon sx={{ color: APP_COLORS.mainGreen }}>
+              <ListItemButton
+                onClick={() => setCurrentView(item.id)}
+                sx={{ py: { xs: 1.5, sm: 2 } }}
+              >
+                <ListItemIcon
+                  sx={{
+                    color: APP_COLORS.mainGreen,
+                    minWidth: { xs: 40, sm: 56 },
+                  }}
+                >
                   {item.icon}
                 </ListItemIcon>
                 <ListItemText
@@ -176,9 +197,15 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
                   primaryTypographyProps={{
                     fontWeight: '600',
                     color: APP_COLORS.textPrimary,
+                    fontSize: { xs: '0.9rem', sm: '1rem' },
                   }}
                 />
-                <ChevronRight sx={{ color: APP_COLORS.lightGray }} />
+                <ChevronRight
+                  sx={{
+                    color: APP_COLORS.lightGray,
+                    fontSize: { xs: '1.2rem', sm: '1.5rem' },
+                  }}
+                />
               </ListItemButton>
             </ListItem>
             {index < configItems.length - 1 && (
@@ -192,8 +219,16 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
       <MenuPaper>
         {/* アカウント情報 */}
         <ListItem disablePadding>
-          <ListItemButton onClick={() => setCurrentView('account')}>
-            <ListItemIcon sx={{ color: APP_COLORS.mainGreen }}>
+          <ListItemButton
+            onClick={() => setCurrentView('account')}
+            sx={{ py: { xs: 1.5, sm: 2 } }}
+          >
+            <ListItemIcon
+              sx={{
+                color: APP_COLORS.mainGreen,
+                minWidth: { xs: 40, sm: 56 },
+              }}
+            >
               <Person />
             </ListItemIcon>
             <ListItemText
@@ -201,9 +236,15 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
               primaryTypographyProps={{
                 fontWeight: '600',
                 color: APP_COLORS.textPrimary,
+                fontSize: { xs: '0.9rem', sm: '1rem' },
               }}
             />
-            <ChevronRight sx={{ color: APP_COLORS.lightGray }} />
+            <ChevronRight
+              sx={{
+                color: APP_COLORS.lightGray,
+                fontSize: { xs: '1.2rem', sm: '1.5rem' },
+              }}
+            />
           </ListItemButton>
         </ListItem>
         <Divider sx={{ borderColor: APP_COLORS.lightGray }} />
@@ -212,9 +253,17 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
         <ListItem disablePadding>
           <ListItemButton
             onClick={handleLogout}
-            sx={{ '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.08)' } }}
+            sx={{
+              '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.08)' },
+              py: { xs: 1.5, sm: 2 },
+            }}
           >
-            <ListItemIcon sx={{ color: APP_COLORS.error }}>
+            <ListItemIcon
+              sx={{
+                color: APP_COLORS.error,
+                minWidth: { xs: 40, sm: 56 },
+              }}
+            >
               <Logout />
             </ListItemIcon>
             <ListItemText
@@ -222,17 +271,27 @@ export const SettingsTab = forwardRef<SettingsTabHandle, {}>((_props, ref) => {
               primaryTypographyProps={{
                 fontWeight: '600',
                 color: APP_COLORS.error,
+                fontSize: { xs: '0.9rem', sm: '1rem' },
               }}
             />
-            <ChevronRight sx={{ color: APP_COLORS.lightGray }} />
+            <ChevronRight
+              sx={{
+                color: APP_COLORS.lightGray,
+                fontSize: { xs: '1.2rem', sm: '1.5rem' },
+              }}
+            />
           </ListItemButton>
         </ListItem>
       </MenuPaper>
 
-      <Box sx={{ mt: 4, textAlign: 'center' }}>
+      <Box sx={{ mt: { xs: 3, sm: 4 }, textAlign: 'center' }}>
         <Typography
           variant="caption"
-          sx={{ color: APP_COLORS.textPrimary, opacity: 0.5 }}
+          sx={{
+            color: APP_COLORS.textPrimary,
+            opacity: 0.5,
+            fontSize: { xs: '0.7rem', sm: '0.75rem' },
+          }}
         >
           家計簿アプリ Version 1.0.0
         </Typography>

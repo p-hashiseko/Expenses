@@ -45,7 +45,8 @@ export const Header: React.FC<HeaderProps> = ({ onUserNameClick }) => {
               borderColor: APP_COLORS.lightGray,
               color: APP_COLORS.textPrimary,
               fontWeight: '600',
-              px: 1,
+              px: { xs: 0.5, sm: 1 }, // モバイルでパディング調整
+              fontSize: { xs: '0.8rem', sm: '0.875rem' }, // モバイルでフォントサイズ調整
               cursor: onUserNameClick ? 'pointer' : 'default',
               fontSize: { xs: '0.75rem', sm: '0.875rem' },
               height: { xs: 28, sm: 32 },
