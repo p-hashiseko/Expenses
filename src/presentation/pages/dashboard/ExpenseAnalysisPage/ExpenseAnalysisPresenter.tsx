@@ -335,7 +335,7 @@ export const ExpenseAnalysisPresenter: React.FC<PresenterProps> = ({
                         {
                           scaleType: 'band',
                           data: categoryLabels,
-                          width: { xs: 80, sm: 100 },
+                          width: 100,
                         },
                       ]}
                       xAxis={[
@@ -379,8 +379,8 @@ export const ExpenseAnalysisPresenter: React.FC<PresenterProps> = ({
                       series={[
                         {
                           data: pieData.filter((item) => item.value > 0),
-                          innerRadius: { xs: 50, sm: 60 },
-                          outerRadius: { xs: 80, sm: 90 },
+                          innerRadius: 50,
+                          outerRadius: 85,
                           paddingAngle: 2,
                         },
                       ]}
