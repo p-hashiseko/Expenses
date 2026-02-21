@@ -28,19 +28,33 @@ export default defineConfig({
         name: 'マイ家計簿アプリ',
         short_name: '家計簿',
         description: 'スマホで使える家計簿アプリ',
-        theme_color: '#ffffff',
+        theme_color: '#3ecf8e',
         background_color: '#ffffff',
         display: 'standalone',
         icons: [
           {
             src: 'pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
           },
           {
             src: 'pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       }
