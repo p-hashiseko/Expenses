@@ -25,12 +25,20 @@ serve(async () => {
     if (error) {
       console.error('income_config error', error)
     } else if (configs && configs.length > 0) {
-      const inserts = configs.map((config) => ({
-        user_id: config.user_id,
-        amount: config.amount,
-        income_day: config.income_config_day,
-        memo: config.memo,
-      }))
+      const inserts = configs.map((config) => {
+        // 月末対応（30 / 31 / 2月）
+        const lastDayOfMonth = new Date(year, month, 0).getDate()
+        const actualDay = Math.min(config.income_config_day, lastDayOfMonth)
+
+        const incomeDate = `${year}-${String(month).padStart(2, '0')}-${String(actualDay).padStart(2, '0')}`
+
+        return {
+          user_id: config.user_id,
+          amount: config.amount,
+          income_day: incomeDate,
+          memo: config.memo,
+        }
+      })
 
       const { error: insertError } = await supabase
         .from('income')
@@ -68,7 +76,7 @@ serve(async () => {
           payment_date: paymentDate,
           memo: fc.memo,
           category: fc.category,
-          amount: fc.amount,
+          amount: fc.amount, // null でも挿入可（フロントで金額未入力として警告表示）
         }
       })
 

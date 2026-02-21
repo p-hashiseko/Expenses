@@ -3,25 +3,62 @@ import {
   BottomNavigation,
   BottomNavigationAction,
   Box,
+  CircularProgress,
   Container,
   Paper,
 } from '@mui/material';
-import React, { useRef, useState } from 'react';
+import React, { Suspense, useRef, useState } from 'react';
 
 import { APP_COLORS } from '../../color.config';
 import { Header } from '../components/Header';
-import {
-  SettingsTab,
-  type SettingsTabHandle,
-} from './dashboard/setting/SettingsTab';
-import { ExpenseAnalysisContainer } from './dashboard/ExpenseAnalysisPage/ExpenseAnalysisContainer';
-import { ExpenseDetailContainer } from './dashboard/ExpenseDetailPage/ExpenseDetailContainer';
+import type { SettingsTabHandle } from './dashboard/setting/SettingsTab';
+import { useAuth } from '../state/AuthContext';
+import { useVariableCostNotification } from '../../hooks/useVariableCostNotification';
+
+// タブコンテンツを遅延ロード（バンドルサイズ削減）
+const ExpenseDetailContainer = React.lazy(() =>
+  import('./dashboard/ExpenseDetailPage/ExpenseDetailContainer').then(
+    (module) => ({
+      default: module.ExpenseDetailContainer,
+    }),
+  ),
+);
+const ExpenseAnalysisContainer = React.lazy(() =>
+  import('./dashboard/ExpenseAnalysisPage/ExpenseAnalysisContainer').then(
+    (module) => ({
+      default: module.ExpenseAnalysisContainer,
+    }),
+  ),
+);
+const SettingsTab = React.lazy(() =>
+  import('./dashboard/setting/SettingsTab').then((module) => ({
+    default: module.SettingsTab,
+  })),
+);
+
+// タブローディングコンポーネント
+const TabLoader: React.FC = () => (
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '50vh',
+    }}
+  >
+    <CircularProgress sx={{ color: APP_COLORS.mainGreen }} />
+  </Box>
+);
 
 export type TabType = 'manage' | 'summary' | 'setting';
 
 export const DashboardPage: React.FC = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('manage');
   const settingsTabRef = useRef<SettingsTabHandle>(null);
+
+  // 変動費の未入力通知を有効化
+  useVariableCostNotification(user?.id, true);
 
   const handleUserNameClick = () => {
     setActiveTab('setting');
@@ -34,13 +71,29 @@ export const DashboardPage: React.FC = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'manage':
-        return <ExpenseDetailContainer />;
+        return (
+          <Suspense fallback={<TabLoader />}>
+            <ExpenseDetailContainer />
+          </Suspense>
+        );
       case 'summary':
-        return <ExpenseAnalysisContainer />;
+        return (
+          <Suspense fallback={<TabLoader />}>
+            <ExpenseAnalysisContainer />
+          </Suspense>
+        );
       case 'setting':
-        return <SettingsTab ref={settingsTabRef} />;
+        return (
+          <Suspense fallback={<TabLoader />}>
+            <SettingsTab ref={settingsTabRef} />
+          </Suspense>
+        );
       default:
-        return <ExpenseDetailContainer />;
+        return (
+          <Suspense fallback={<TabLoader />}>
+            <ExpenseDetailContainer />
+          </Suspense>
+        );
     }
   };
 

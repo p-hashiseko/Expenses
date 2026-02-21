@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import {
   Box,
   Typography,
@@ -16,8 +16,32 @@ import {
   ToggleButtonGroup,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import { BarChart } from '@mui/x-charts/BarChart';
-import { PieChart } from '@mui/x-charts/PieChart';
+
+// チャートを遅延ロード（バンドルサイズ削減）
+const BarChart = React.lazy(() =>
+  import('@mui/x-charts/BarChart').then((module) => ({
+    default: module.BarChart,
+  })),
+);
+const PieChart = React.lazy(() =>
+  import('@mui/x-charts/PieChart').then((module) => ({
+    default: module.PieChart,
+  })),
+);
+
+// チャートローディングコンポーネント
+const ChartLoader: React.FC = () => (
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: 300,
+    }}
+  >
+    <CircularProgress />
+  </Box>
+);
 
 interface PresenterProps {
   year: number;
@@ -328,35 +352,37 @@ export const ExpenseAnalysisPresenter: React.FC<PresenterProps> = ({
                   </Typography>
 
                   <Box sx={{ width: '100%', height: { xs: 280, sm: 320 } }}>
-                    <BarChart
-                      layout="horizontal"
-                      height={300}
-                      yAxis={[
-                        {
-                          scaleType: 'band',
-                          data: categoryLabels,
-                          width: 100,
-                        },
-                      ]}
-                      xAxis={[
-                        {
-                          min: 0,
-                          max: maxExpense * 1.2,
-                        },
-                      ]}
-                      series={[
-                        {
-                          data: barSeriesData,
-                          label: '実績',
-                          color: '#3ecf8e',
-                        },
-                        {
-                          data: barObjectiveData,
-                          label: '目標',
-                          color: '#E5E7EB',
-                        },
-                      ]}
-                    />
+                    <Suspense fallback={<ChartLoader />}>
+                      <BarChart
+                        layout="horizontal"
+                        height={300}
+                        yAxis={[
+                          {
+                            scaleType: 'band',
+                            data: categoryLabels,
+                            width: 100,
+                          },
+                        ]}
+                        xAxis={[
+                          {
+                            min: 0,
+                            max: maxExpense * 1.2,
+                          },
+                        ]}
+                        series={[
+                          {
+                            data: barSeriesData,
+                            label: '実績',
+                            color: '#3ecf8e',
+                          },
+                          {
+                            data: barObjectiveData,
+                            label: '目標',
+                            color: '#E5E7EB',
+                          },
+                        ]}
+                      />
+                    </Suspense>
                   </Box>
                 </Grid>
 
@@ -372,22 +398,24 @@ export const ExpenseAnalysisPresenter: React.FC<PresenterProps> = ({
                   </Typography>
 
                   <Box sx={{ width: '100%', height: { xs: 280, sm: 320 } }}>
-                    <PieChart
-                      width={320}
-                      height={300}
-                      margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                      series={[
-                        {
-                          data: pieData.filter((item) => item.value > 0),
-                          innerRadius: 50,
-                          outerRadius: 85,
-                          paddingAngle: 2,
-                        },
-                      ]}
-                      slots={{
-                        legend: () => null,
-                      }}
-                    />
+                    <Suspense fallback={<ChartLoader />}>
+                      <PieChart
+                        width={320}
+                        height={300}
+                        margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        series={[
+                          {
+                            data: pieData.filter((item) => item.value > 0),
+                            innerRadius: 50,
+                            outerRadius: 85,
+                            paddingAngle: 2,
+                          },
+                        ]}
+                        slots={{
+                          legend: () => null,
+                        }}
+                      />
+                    </Suspense>
                   </Box>
                 </Grid>
 
@@ -404,35 +432,37 @@ export const ExpenseAnalysisPresenter: React.FC<PresenterProps> = ({
                     </Typography>
 
                     <Box sx={{ width: '100%', height: { xs: 280, sm: 300 } }}>
-                      <BarChart
-                        height={280}
-                        xAxis={[
-                          {
-                            scaleType: 'band',
-                            data: [
-                              '1月',
-                              '2月',
-                              '3月',
-                              '4月',
-                              '5月',
-                              '6月',
-                              '7月',
-                              '8月',
-                              '9月',
-                              '10月',
-                              '11月',
-                              '12月',
-                            ],
-                          },
-                        ]}
-                        series={[
-                          {
-                            data: monthlyData,
-                            label: '支出',
-                            color: '#3ecf8e',
-                          },
-                        ]}
-                      />
+                      <Suspense fallback={<ChartLoader />}>
+                        <BarChart
+                          height={280}
+                          xAxis={[
+                            {
+                              scaleType: 'band',
+                              data: [
+                                '1月',
+                                '2月',
+                                '3月',
+                                '4月',
+                                '5月',
+                                '6月',
+                                '7月',
+                                '8月',
+                                '9月',
+                                '10月',
+                                '11月',
+                                '12月',
+                              ],
+                            },
+                          ]}
+                          series={[
+                            {
+                              data: monthlyData,
+                              label: '支出',
+                              color: '#3ecf8e',
+                            },
+                          ]}
+                        />
+                      </Suspense>
                     </Box>
                   </Grid>
                 )}
@@ -549,8 +579,9 @@ export const ExpenseAnalysisPresenter: React.FC<PresenterProps> = ({
                                   px: { xs: 1, sm: 2 },
                                 }}
                               >
-                                {((row.amount / totalExpense) * 100).toFixed(1)}
-                                %
+                                {totalExpense > 0
+                                  ? `${((row.amount / totalExpense) * 100).toFixed(1)}%`
+                                  : '-%'}
                               </TableCell>
                             </TableRow>
                           );

@@ -162,4 +162,19 @@ export const IncomeRepository = {
 
     if (error) throw error;
   },
+
+  /**
+   * 初期所持金を取得（income_dayがnullのレコードの合計）
+   */
+  async getInitialBalance(userId: string): Promise<number> {
+    const { data, error } = await supabase
+      .from('income')
+      .select('amount')
+      .eq('user_id', userId)
+      .is('income_day', null);
+
+    if (error) throw error;
+
+    return (data || []).reduce((sum, row) => sum + (row.amount || 0), 0);
+  },
 };

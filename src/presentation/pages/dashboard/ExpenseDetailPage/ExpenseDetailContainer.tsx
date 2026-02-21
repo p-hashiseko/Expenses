@@ -26,6 +26,12 @@ export const ExpenseDetailContainer: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [years, setYears] = useState<number[]>([]);
 
+  // 累積残高計算用
+  const [initialBalance, setInitialBalance] = useState<number>(0);
+  const [totalIncomeUpToToday, setTotalIncomeUpToToday] = useState<number>(0);
+  const [totalExpensesUpToToday, setTotalExpensesUpToToday] =
+    useState<number>(0);
+
   // ダイアログ関連の状態
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -85,7 +91,15 @@ export const ExpenseDetailContainer: React.FC = () => {
       const startDate = displayDays[0];
       const endDate = displayDays[displayDays.length - 1];
 
-      const [catData, expData, incData, invData] = await Promise.all([
+      const [
+        catData,
+        expData,
+        incData,
+        invData,
+        initialBal,
+        totalInc,
+        totalExp,
+      ] = await Promise.all([
         CategoryConfigRepository.getCategoryConfig(user.id),
         ExpensesRepository.getExpensesByPeriod(user.id, startDate, endDate),
         IncomeRepository.getIncomesByPeriod(user.id, startDate, endDate),
@@ -94,12 +108,27 @@ export const ExpenseDetailContainer: React.FC = () => {
           startDate,
           endDate,
         ),
+        // 累積残高計算用: 初期所持金
+        IncomeRepository.getInitialBalance(user.id),
+        // 累積残高計算用: 今日までの全収入（期間の終わりまで）
+        IncomeRepository.getIncomeByPeriod(user.id, '1900-01-01', endDate),
+        // 累積残高計算用: 今日までの全支出（期間の終わりまで）
+        ExpensesRepository.getExpensesByPeriod(
+          user.id,
+          '1900-01-01',
+          endDate,
+        ).then((expenses) =>
+          expenses.reduce((sum, e) => sum + (e.amount || 0), 0),
+        ),
       ]);
 
       setCategories(catData);
       setExpenses(expData);
       setIncomes(incData);
       setInvestments(invData);
+      setInitialBalance(initialBal);
+      setTotalIncomeUpToToday(totalInc);
+      setTotalExpensesUpToToday(totalExp);
 
       // 今日の列にスクロール
       setTimeout(() => {
@@ -379,6 +408,9 @@ export const ExpenseDetailContainer: React.FC = () => {
       onInvestmentAdd={handleInvestmentAdd}
       onInvestmentUpdate={handleInvestmentUpdate}
       onInvestmentDelete={handleInvestmentDelete}
+      initialBalance={initialBalance}
+      totalIncomeUpToToday={totalIncomeUpToToday}
+      totalExpensesUpToToday={totalExpensesUpToToday}
     />
   );
 };

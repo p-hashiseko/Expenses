@@ -55,6 +55,9 @@ type Props = {
     flow: 'in' | 'out',
   ) => void;
   onInvestmentDelete: (id: number) => void;
+  initialBalance: number;
+  totalIncomeUpToToday: number;
+  totalExpensesUpToToday: number;
 };
 
 const formatDayCell = (dateStr: string) => {
@@ -98,7 +101,16 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
   const monthlyIncome = props.incomes.reduce((sum, i) => sum + i.amount, 0);
 
   // 月間総合計（支出）
-  const monthlyTotal = props.expenses.reduce((sum, e) => sum + e.amount, 0);
+  const monthlyTotal = props.expenses.reduce(
+    (sum, e) => sum + (e.amount || 0),
+    0,
+  );
+
+  // 現金（累積残高）= 初期所持金 + 全収入 - 全支出
+  const cashBalance =
+    props.initialBalance +
+    props.totalIncomeUpToToday -
+    props.totalExpensesUpToToday;
 
   // 月間投資合計（in - out）
   const monthlyInvestment = props.investments.reduce((sum, inv) => {
@@ -147,13 +159,26 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
     const formattedDate = format(parseISO(date), 'yyyy/MM/dd', {
       locale: ja,
     });
+
+    // 金額未入力のレコードがあるかチェック
+    const hasNullAmount = matchingExpenses.some(
+      (exp) => exp.amount === null || exp.amount === 0,
+    );
+
+    if (hasNullAmount) {
+      lines.push('⚠️ 金額を入力してください');
+      lines.push('');
+    }
+
     matchingExpenses.forEach((exp) => {
-      lines.push(
-        `${formattedDate}  ${formatCurrency(exp.amount)}  ${exp.memo || ''}`,
-      );
+      const amountText =
+        exp.amount === null || exp.amount === 0
+          ? '未入力'
+          : formatCurrency(exp.amount);
+      lines.push(`${formattedDate}  ${amountText}  ${exp.memo || ''}`);
     });
     lines.push('────────────────────');
-    const total = matchingExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const total = matchingExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
     lines.push(`合計: ${formatCurrency(total)}`);
     return lines.join('\n');
   };
@@ -258,7 +283,7 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                   px: { xs: 0.5, sm: 1 },
                 }}
               >
-                収支
+                現金
               </TableCell>
               <TableCell
                 align="center"
@@ -307,13 +332,9 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                   variant="h6"
                   fontWeight="bold"
                   sx={{ fontSize: { xs: '0.95rem', sm: '1.25rem' } }} // モバイルでフォントサイズ調整
-                  color={
-                    monthlyIncome - monthlyTotal >= 0
-                      ? APP_COLORS.mainGreen
-                      : 'error.main'
-                  }
+                  color={cashBalance >= 0 ? APP_COLORS.mainGreen : 'error.main'}
                 >
-                  {formatCurrency(monthlyIncome - monthlyTotal)} 円
+                  {formatCurrency(cashBalance)} 円
                 </Typography>
               </TableCell>
               <TableCell
@@ -731,8 +752,12 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                         e.payment_date === date && e.category === cat.category,
                     );
                     const totalAmount = matchingExpenses.reduce(
-                      (sum, e) => sum + e.amount,
+                      (sum, e) => sum + (e.amount || 0),
                       0,
+                    );
+                    // 金額未入力のレコードがあるかチェック
+                    const hasNullAmount = matchingExpenses.some(
+                      (e) => e.amount === null || e.amount === 0,
                     );
                     const isToday = date === props.todayStr;
                     const dateObj = parseISO(date);
@@ -749,15 +774,23 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                         align="right"
                         onClick={() => props.onCellClick(cat.category, date)}
                         sx={{
-                          bgcolor: isToday
-                            ? APP_COLORS.today.cell
-                            : isSun
-                              ? APP_COLORS.sunday.cell
-                              : isSat
-                                ? APP_COLORS.saturday.cell
-                                : 'white',
-                          border: '1px solid #f0f0f0',
-                          color: totalAmount > 0 ? 'inherit' : '#ccc',
+                          bgcolor: hasNullAmount
+                            ? '#ffebee' // 金額未入力の場合は赤系背景
+                            : isToday
+                              ? APP_COLORS.today.cell
+                              : isSun
+                                ? APP_COLORS.sunday.cell
+                                : isSat
+                                  ? APP_COLORS.saturday.cell
+                                  : 'white',
+                          border: hasNullAmount
+                            ? '2px solid #ef5350' // 金額未入力の場合は赤枠
+                            : '1px solid #f0f0f0',
+                          color: hasNullAmount
+                            ? '#d32f2f' // 金額未入力の場合は赤文字
+                            : totalAmount > 0
+                              ? 'inherit'
+                              : '#ccc',
                           fontSize: { xs: '0.6rem', sm: '0.7rem' },
                           width: { xs: 70, sm: 80 },
                           minWidth: { xs: 70, sm: 80 },
@@ -765,14 +798,20 @@ export const ExpenseDetailPresenter: React.FC<Props> = (props) => {
                           px: { xs: 0.3, sm: 0.5 },
                           cursor: 'pointer',
                           '&:hover': {
-                            bgcolor: isToday
-                              ? APP_COLORS.today.cell
-                              : APP_COLORS.lightGray,
+                            bgcolor: hasNullAmount
+                              ? '#ffcdd2'
+                              : isToday
+                                ? APP_COLORS.today.cell
+                                : APP_COLORS.lightGray,
                             opacity: 0.8,
                           },
                         }}
                       >
-                        {totalAmount > 0 ? formatCurrency(totalAmount) : '-'}
+                        {hasNullAmount
+                          ? '⚠️未入力'
+                          : totalAmount > 0
+                            ? formatCurrency(totalAmount)
+                            : '-'}
                       </TableCell>
                     );
 

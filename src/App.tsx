@@ -1,13 +1,45 @@
+import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import { AuthProvider } from './presentation/state/AuthContext';
 import { AuthGuard } from './presentation/components/AuthGuard';
-import { LoginPage } from './presentation/pages/LoginPage';
-import { SignupPage } from './presentation/pages/SignupPage';
-import { DashboardPage } from './presentation/pages/DashboardPage';
 import { APP_COLORS } from './color.config';
+import { useNotificationSetup } from './hooks/useNotificationSetup';
+
+// ページコンポーネントを遅延ロード（バンドルサイズ削減）
+const LoginPage = React.lazy(() =>
+  import('./presentation/pages/LoginPage').then((module) => ({
+    default: module.LoginPage,
+  })),
+);
+const SignupPage = React.lazy(() =>
+  import('./presentation/pages/SignupPage').then((module) => ({
+    default: module.SignupPage,
+  })),
+);
+const DashboardPage = React.lazy(() =>
+  import('./presentation/pages/DashboardPage').then((module) => ({
+    default: module.DashboardPage,
+  })),
+);
+
+// ローディングコンポーネント
+const PageLoader: React.FC = () => (
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      bgcolor: APP_COLORS.background,
+    }}
+  >
+    <CircularProgress sx={{ color: APP_COLORS.mainGreen }} />
+  </Box>
+);
 
 // MUIのカスタムテーマ作成
 const theme = createTheme({
@@ -66,6 +98,9 @@ const theme = createTheme({
 });
 
 function App() {
+  // 通知機能の初期化
+  useNotificationSetup();
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -81,19 +116,21 @@ function App() {
           }}
         >
           <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route
-                path="/"
-                element={
-                  <AuthGuard>
-                    <DashboardPage />
-                  </AuthGuard>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route
+                  path="/"
+                  element={
+                    <AuthGuard>
+                      <DashboardPage />
+                    </AuthGuard>
+                  }
+                />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </Box>
       </AuthProvider>

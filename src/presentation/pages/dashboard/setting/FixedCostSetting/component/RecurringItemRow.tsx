@@ -127,9 +127,15 @@ export const RecurringItemRow: React.FC<RecurringItemRowProps> = ({
           <TextField
             label="金額"
             size="small"
-            value={formatCurrency(item.amount ?? 0)}
+            placeholder="金額を入力"
+            value={
+              item.amount === null || item.amount === 0
+                ? ''
+                : formatCurrency(item.amount)
+            }
             onChange={(e) => {
               const val = sanitizeNumericInput(e.target.value);
+              // 固定費は 0 で保存（バリデーションで弾かれる）、変動費は null
               onUpdate(index, 'amount', val === '' ? 0 : parseInt(val, 10));
             }}
             sx={{ flex: 1.5, '& .MuiInputBase-input': { textAlign: 'right' } }}
